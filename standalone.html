@@ -1,0 +1,4524 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Salesforce Org Axonometric Masterplan // Architectural Visualizer</title>
+  <style>
+    /* ==========================================================================
+   Salesforce Architecture Axonometric Masterplan - Architectural Drafting UI
+   Swiss International Style / Modern Architectural Axonometric Aesthetic
+   ========================================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap');
+
+:root {
+  --canvas-bg: #090d16;
+  --drafting-board: #060911;
+  --grid-line: rgba(255, 255, 255, 0.05);
+  --grid-major: rgba(255, 255, 255, 0.12);
+  
+  --ui-bg: rgba(10, 15, 26, 0.88);
+  --ui-surface: rgba(15, 23, 40, 0.94);
+  --ui-card: rgba(18, 27, 46, 0.75);
+  --ui-border: rgba(255, 255, 255, 0.1);
+  --ui-border-active: rgba(56, 189, 248, 0.45);
+
+  --text-primary: #f8fafc;
+  --text-secondary: #94a3b8;
+  --text-muted: #64748b;
+
+  --arch-cyan: #00f0ff;
+  --arch-blue: #38bdf8;
+  --arch-indigo: #6366f1;
+  --arch-purple: #a855f7;
+  --arch-emerald: #10b981;
+  --arch-amber: #f59e0b;
+  --arch-vermilion: #ff453a;
+  --arch-pink: #ec4899;
+
+  --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background-color: var(--drafting-board);
+  color: var(--text-primary);
+  font-family: var(--font-sans);
+  user-select: none;
+  position: relative;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Background Canvas */
+#city-canvas {
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  display: block !important;
+  z-index: 1 !important;
+  background-color: var(--drafting-board);
+  cursor: grab;
+}
+
+#city-canvas:active {
+  cursor: grabbing;
+}
+
+/* Architectural Drafting Grid Overlay */
+.drafting-grid {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 2;
+  background-image: 
+    linear-gradient(to right, var(--grid-line) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--grid-line) 1px, transparent 1px);
+  background-size: 40px 40px;
+  mask-image: radial-gradient(circle at center, black 40%, transparent 95%);
+  -webkit-mask-image: radial-gradient(circle at center, black 40%, transparent 95%);
+  opacity: 0.8;
+}
+
+/* Drafting Vellum Vignette */
+.vellum-vignette {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 5;
+  box-shadow: inset 0 0 120px rgba(0, 0, 0, 0.85);
+}
+
+/* Top Architectural Navigation Bar */
+.arch-header {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  right: 20px;
+  z-index: 25;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 20px;
+  background: var(--ui-bg);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid var(--ui-border);
+  border-radius: 12px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
+}
+
+/* Brand Identity */
+.arch-brand {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.arch-logo {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  background: linear-gradient(135deg, rgba(0, 240, 255, 0.15) 0%, rgba(99, 102, 241, 0.15) 100%);
+  border: 1px solid rgba(0, 240, 255, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-mono);
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--arch-cyan);
+  box-shadow: 0 0 14px rgba(0, 240, 255, 0.25);
+}
+
+.arch-title {
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.arch-subtitle {
+  font-size: 11px;
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  letter-spacing: 0.02em;
+}
+
+/* Datum Tag / Pill */
+.datum-tag {
+  font-size: 10px;
+  font-family: var(--font-mono);
+  font-weight: 600;
+  padding: 2px 7px;
+  border-radius: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: var(--text-secondary);
+}
+
+/* Segmented Program Filter */
+.program-selector {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  background: rgba(8, 12, 22, 0.7);
+  padding: 4px;
+  border-radius: 9px;
+  border: 1px solid var(--ui-border);
+}
+
+.program-btn {
+  padding: 6px 13px;
+  border-radius: 6px;
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+  font-family: var(--font-sans);
+}
+
+.program-btn:hover {
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.program-btn.active {
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+/* Action Controls */
+.action-btn-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 15px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #ffffff;
+  background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  cursor: pointer;
+  transition: all 0.18s ease;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+}
+
+.action-btn-primary:hover {
+  border-color: var(--arch-cyan);
+  background: linear-gradient(135deg, #334155 0%, #1e293b 100%);
+  box-shadow: 0 0 16px rgba(0, 240, 255, 0.3);
+  transform: translateY(-1px);
+}
+
+.action-btn-ghost {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 12px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  background: transparent;
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.action-btn-ghost:hover {
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+/* Slide-Over Architectural Dossier (Right) */
+#building-inspector {
+  position: absolute;
+  top: 88px;
+  right: 20px;
+  bottom: 68px;
+  width: 440px;
+  max-width: calc(100vw - 40px);
+  z-index: 35;
+  background: var(--ui-surface);
+  backdrop-filter: blur(28px);
+  -webkit-backdrop-filter: blur(28px);
+  border: 1px solid var(--ui-border);
+  border-radius: 14px;
+  box-shadow: 0 30px 60px rgba(0, 0, 0, 0.75), 0 0 30px rgba(0, 0, 0, 0.5);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  animation: slide-drawer 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes slide-drawer {
+  from { transform: translateX(50px); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+
+/* Bottom Architectural Scale & Quick-Jump Dock */
+.arch-dock {
+  position: absolute;
+  bottom: 20px;
+  left: 20px;
+  right: 20px;
+  z-index: 25;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 18px;
+  background: var(--ui-bg);
+  backdrop-filter: blur(24px);
+  border: 1px solid var(--ui-border);
+  border-radius: 10px;
+  font-size: 11.5px;
+}
+
+/* Active Simulation Toast */
+#sim-banner {
+  position: absolute;
+  top: 92px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 40;
+  width: 90%;
+  max-width: 660px;
+  background: rgba(9, 14, 26, 0.95);
+  backdrop-filter: blur(24px);
+  border: 1px solid var(--arch-emerald);
+  border-radius: 10px;
+  padding: 14px 20px;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8), 0 0 30px rgba(16, 185, 129, 0.25);
+  animation: banner-drop 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes banner-drop {
+  from { transform: translate(-50%, -25px); opacity: 0; }
+  to { transform: translate(-50%, 0); opacity: 1; }
+}
+
+/* Modal Overlay & Studio Showcase */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  background: rgba(3, 5, 12, 0.88);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 28px;
+  animation: modal-fade 0.2s ease;
+}
+
+@keyframes modal-fade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.modal-window {
+  width: 100%;
+  max-width: 1160px;
+  height: 88vh;
+  background: var(--ui-surface);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 16px;
+  box-shadow: 0 35px 80px rgba(0, 0, 0, 0.9), 0 0 50px rgba(0, 240, 255, 0.15);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* Architectural Card */
+.arch-card {
+  background: var(--ui-card);
+  border: 1px solid var(--ui-border);
+  border-radius: 10px;
+  padding: 16px;
+  transition: all 0.2s ease;
+}
+
+.arch-card:hover {
+  border-color: var(--ui-border-active);
+  background: rgba(22, 33, 56, 0.8);
+}
+
+/* Code & Schema Previews */
+pre {
+  margin: 0;
+  padding: 16px;
+  background: #050811 !important;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+  overflow-x: auto;
+}
+
+code {
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  line-height: 1.65;
+}
+
+/* Guaranteed Utilities */
+.hidden { display: none !important; }
+.flex { display: flex; }
+.flex-col { flex-direction: column; }
+.items-center { align-items: center; }
+.justify-between { justify-content: space-between; }
+.gap-1 { gap: 4px; }
+.gap-2 { gap: 8px; }
+.gap-3 { gap: 12px; }
+.gap-4 { gap: 16px; }
+.flex-1 { flex: 1 1 0%; }
+.overflow-y-auto { overflow-y: auto; }
+.overflow-hidden { overflow: hidden; }
+
+/* Custom Scrollbars */
+::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.18);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.35);
+}
+
+/* Guided Tour & Simulation Controller Animations */
+@keyframes tour-slide-up {
+  from { transform: translate(-50%, 40px); opacity: 0; }
+  to { transform: translate(-50%, 0); opacity: 1; }
+}
+
+@keyframes sim-fade {
+  from { transform: translate(-50%, -20px); opacity: 0; }
+  to { transform: translate(-50%, 0); opacity: 1; }
+}
+
+/* Command Palette Styling */
+.palette-window {
+  animation: palette-drop 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes palette-drop {
+  from { transform: translateY(-20px) scale(0.98); opacity: 0; }
+  to { transform: translateY(0) scale(1); opacity: 1; }
+}
+
+.palette-item:hover {
+  background: rgba(56, 189, 248, 0.08);
+}
+
+  </style>
+</head>
+<body>
+
+  <!-- Fullscreen Axonometric Drafting Canvas -->
+  <canvas id="city-canvas"></canvas>
+
+  <!-- Architectural Drafting Grid Overlay -->
+  <div class="drafting-grid"></div>
+
+  <!-- Vellum Edge Vignette -->
+  <div class="vellum-vignette"></div>
+
+  <!-- Top Architectural Navigation Bar -->
+  <header class="arch-header">
+    <!-- Brand & Masterplan Identification -->
+    <div class="arch-brand">
+      <div class="arch-logo">SF</div>
+      <div>
+        <div class="arch-title">
+          <span>SALESFORCE ORG MASTERPLAN</span>
+          <span class="datum-tag" style="border-color: rgba(0, 240, 255, 0.4); color: #00f0ff;">AXONOMETRIC v66.0</span>
+        </div>
+        <div class="arch-subtitle">METADATA, SEMANTIC GRAPH & COGNITIVE FABRIC</div>
+      </div>
+    </div>
+
+    <!-- Quick Search Command Button -->
+    <button id="btn-open-search" class="action-btn-ghost" style="border: 1px solid rgba(255, 255, 255, 0.12); padding: 5px 12px; gap: 8px;" title="Universal Search (⌘K)">
+      <span>🔍</span>
+      <span style="font-size: 11.5px; color: #cbd5e1;">Search...</span>
+      <span class="datum-tag" style="font-size: 9px;">⌘K</span>
+    </button>
+
+    <!-- Architectural Zoning / District Filter -->
+    <div class="program-selector">
+      <button data-filter="all" class="filter-btn program-btn active">Masterplan (All)</button>
+      <button data-filter="metadata" class="filter-btn program-btn">1. Metadata</button>
+      <button data-filter="automation" class="filter-btn program-btn">2. Logic Grid</button>
+      <button data-filter="semantic" class="filter-btn program-btn">3. Semantic Lake</button>
+      <button data-filter="headless" class="filter-btn program-btn">4. Headless 360</button>
+      <button data-filter="agentforce" class="filter-btn program-btn">5. Agentforce</button>
+      <button data-filter="claudeforce" class="filter-btn program-btn">6. Claudeforce</button>
+      <button data-filter="mcp" class="filter-btn program-btn">7. Dual MCPs</button>
+    </div>
+
+    <!-- Architectural Controls & Studio -->
+    <div style="display: flex; align-items: center; gap: 8px;">
+      <button id="btn-start-tour" class="action-btn-primary" style="background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%); border-color: rgba(56, 189, 248, 0.4);" title="Start Guided Architectural Tour (T)">
+        <span>🧭</span>
+        <span>Guided Tour</span>
+      </button>
+
+      <button id="btn-open-academy" class="action-btn-primary" style="background: linear-gradient(135deg, #4f46e5 0%, #3730a3 100%); border-color: rgba(99, 102, 241, 0.4);">
+        <span>🏛️</span>
+        <span>Concept Studio</span>
+      </button>
+
+      <button id="btn-run-simulation" class="action-btn-primary" style="background: linear-gradient(135deg, #059669 0%, #065f46 100%); border-color: rgba(16, 185, 129, 0.4);">
+        <span>⚡</span>
+        <span>Interactive Scenario</span>
+      </button>
+
+      <button id="btn-toggle-callouts" class="action-btn-ghost" title="Toggle Architectural Callouts">
+        📐 Callouts
+      </button>
+
+      <button id="btn-shortcuts" class="action-btn-ghost" title="Keyboard Shortcuts (?)">
+        ⌨️
+      </button>
+
+      <button id="btn-toggle-sound" class="action-btn-ghost">
+        🔊
+      </button>
+
+      <button id="btn-center-camera" class="action-btn-ghost" title="Center View (C)">
+        🎯
+      </button>
+    </div>
+  </header>
+
+  <!-- Interactive Simulation Controller Container -->
+  <div id="simulation-controller-container" class="hidden"></div>
+
+  <!-- Guided Tour Container -->
+  <div id="guided-tour-container" class="hidden"></div>
+
+  <!-- Command Palette Modal -->
+  <div id="command-palette-modal" class="hidden"></div>
+
+  <!-- Slide-Over Architectural Dossier -->
+  <aside id="building-inspector" class="hidden"></aside>
+
+  <!-- Bottom Architectural Dock & Scale -->
+  <footer class="arch-dock">
+    <div style="display: flex; align-items: center; gap: 6px; overflow-x: auto;">
+      <span style="font-size: 10px; color: #64748b; font-family: 'JetBrains Mono', monospace; text-transform: uppercase; margin-right: 6px;">ZONE SELECT:</span>
+      <button data-target="b_standard_objects" class="district-jump-btn program-btn" style="color: #38bdf8;">1. Metadata Citadel</button>
+      <button data-target="b_apex_foundry" class="district-jump-btn program-btn" style="color: #f59e0b;">2. Logic Grid</button>
+      <button data-target="b_data_lake" class="district-jump-btn program-btn" style="color: #06b6d4;">3. Semantic Lake</button>
+      <button data-target="b_headless_gateway" class="district-jump-btn program-btn" style="color: #10b981;">4. Headless 360</button>
+      <button data-target="b_agentforce_core" class="district-jump-btn program-btn" style="color: #a855f7;">5. Agentforce Spire</button>
+      <button data-target="b_claudeforce_lab" class="district-jump-btn program-btn" style="color: #f97316;">6. Claudeforce Lab</button>
+      <button data-target="b_mcp_context" class="district-jump-btn program-btn" style="color: #ec4899;">7. Dual MCPs</button>
+    </div>
+    <div style="display: flex; align-items: center; gap: 14px; font-size: 11px; color: #64748b; font-family: 'JetBrains Mono', monospace;">
+      <span>PRESS <strong>⌘K</strong> TO SEARCH</span> • <span>PRESS <strong>T</strong> FOR TOUR</span> • <span>PRESS <strong>SPACE</strong> FOR SCENARIO</span>
+    </div>
+  </footer>
+
+  <!-- Architectural Concept Studio Modal -->
+  <div id="concept-modal" class="hidden"></div>
+
+  <!-- Keyboard Shortcuts Cheatsheet Modal -->
+  <div id="shortcuts-modal" class="hidden"></div>
+
+  <script>
+    
+(function() {
+  /**
+ * Synthesized 8-Bit Web Audio API Sound System
+ * Zero external audio files required. Crisp retro synthesizer sound fx.
+ */
+
+class SoundFx {
+  constructor() {
+    this.ctx = null;
+    this.muted = false;
+    this.initialized = false;
+  }
+
+  init() {
+    if (this.initialized) return;
+    try {
+      const AudioContext = window.AudioContext || window.webkitAudioContext;
+      if (AudioContext) {
+        this.ctx = new AudioContext();
+        this.initialized = true;
+      }
+    } catch (e) {
+      console.warn('Web Audio not supported or blocked:', e);
+    }
+  }
+
+  toggleMute() {
+    this.muted = !this.muted;
+    return this.muted;
+  }
+
+  playBeep(freq = 440, duration = 0.08, type = 'square', gainVal = 0.08) {
+    if (this.muted) return;
+    this.init();
+    if (!this.ctx) return;
+
+    if (this.ctx.state === 'suspended') {
+      this.ctx.resume();
+    }
+
+    try {
+      const osc = this.ctx.createOscillator();
+      const gain = this.ctx.createGain();
+
+      osc.type = type;
+      osc.frequency.setValueAtTime(freq, this.ctx.currentTime);
+
+      gain.gain.setValueAtTime(gainVal, this.ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.0001, this.ctx.currentTime + duration);
+
+      osc.connect(gain);
+      gain.connect(this.ctx.destination);
+
+      osc.start();
+      osc.stop(this.ctx.currentTime + duration);
+    } catch (e) {
+      // Audio autoplay policy catch
+    }
+  }
+
+  click() {
+    this.playBeep(520, 0.05, 'triangle', 0.06);
+  }
+
+  buildingSelect() {
+    if (this.muted) return;
+    this.playBeep(440, 0.06, 'square', 0.08);
+    setTimeout(() => this.playBeep(660, 0.09, 'square', 0.08), 50);
+  }
+
+  districtSelect() {
+    if (this.muted) return;
+    this.playBeep(330, 0.06, 'triangle', 0.08);
+    setTimeout(() => this.playBeep(495, 0.06, 'triangle', 0.08), 60);
+    setTimeout(() => this.playBeep(660, 0.12, 'square', 0.09), 120);
+  }
+
+  pulse() {
+    if (this.muted) return;
+    this.playBeep(880, 0.04, 'sine', 0.04);
+  }
+
+  simulationStep() {
+    if (this.muted) return;
+    this.playBeep(587.33, 0.08, 'sawtooth', 0.06);
+    setTimeout(() => this.playBeep(880, 0.1, 'square', 0.07), 70);
+  }
+
+  openModal() {
+    if (this.muted) return;
+    this.playBeep(392, 0.05, 'triangle', 0.06);
+    setTimeout(() => this.playBeep(523.25, 0.08, 'triangle', 0.07), 50);
+    setTimeout(() => this.playBeep(784, 0.12, 'square', 0.08), 100);
+  }
+
+  closeModal() {
+    if (this.muted) return;
+    this.playBeep(659.25, 0.05, 'triangle', 0.06);
+    setTimeout(() => this.playBeep(440, 0.08, 'triangle', 0.05), 50);
+  }
+}
+
+const sfx = new SoundFx();
+
+  /**
+ * City layout grid definition for 2.5D Isometric Salesforce Org Visualizer.
+ * 28x28 isometric grid with thematic districts, roads, waterways, and conduits.
+ */
+
+const GRID_SIZE = 28;
+const TILE_WIDTH = 64;
+const TILE_HEIGHT = 32;
+
+// Tile types:
+// 0: Grass / Cyber Turf
+// 1: Paved Road
+// 2: Glowing Fiber-Optic Data Highway
+// 3: Water (Data Lake Reservoir)
+// 4: Building Foundation / Concrete Pad
+// 5: Tech Plaza / Stone Cobble
+// 6: Maglev Transit Track
+
+function generateTileMap() {
+  const map = [];
+  for (let y = 0; y < GRID_SIZE; y++) {
+    const row = [];
+    for (let x = 0; x < GRID_SIZE; x++) {
+      // Default ground
+      let type = 0;
+
+      // Data Lake reservoir in North-East (x >= 18 and y <= 8)
+      if (x >= 18 && y <= 6) {
+        type = 3;
+      }
+
+      // Main East-West Highway (y = 10, y = 11)
+      if (y === 10 || y === 11) {
+        type = (x % 2 === 0) ? 2 : 1;
+      }
+
+      // Main North-South Highway (x = 10, x = 11)
+      if (x === 10 || x === 11) {
+        type = (y % 2 === 0) ? 2 : 1;
+      }
+
+      // Secondary roads
+      if (y === 5 || y === 18) {
+        if (type !== 3) type = 1;
+      }
+      if (x === 5 || x === 18) {
+        if (type !== 3) type = 1;
+      }
+
+      // Maglev Track to MCP Interchange (South-East loop)
+      if ((x >= 15 && y >= 17) && (x === 15 || y === 17 || x === 24 || y === 24)) {
+        type = 6;
+      }
+
+      // Central Agentforce Plaza (x: 10-15, y: 10-15)
+      if (x >= 11 && x <= 14 && y >= 11 && y <= 14) {
+        type = 5;
+      }
+
+      row.push(type);
+    }
+    map.push(row);
+  }
+  return map;
+}
+
+const DRONE_PATHS = [
+  // Kaveri Autonomous Drone: Semantic Harbor -> Agentforce Core -> Headless 360
+  [
+    { x: 19, y: 4 },
+    { x: 18, y: 8 },
+    { x: 13, y: 12 },
+    { x: 6, y: 18 },
+    { x: 3, y: 15 },
+    { x: 13, y: 12 }
+  ],
+  // Claudeforce Co-Pilot Drone: Claudeforce Lab -> Apex Foundry -> Metadata Citadel
+  [
+    { x: 17, y: 13 },
+    { x: 14, y: 5 },
+    { x: 4, y: 4 },
+    { x: 10, y: 12 },
+    { x: 17, y: 13 }
+  ],
+  // MCP Transit Shuttle: MCP Interchange -> Agentforce -> Security Citadel
+  [
+    { x: 16, y: 20 },
+    { x: 20, y: 17 },
+    { x: 12, y: 12 },
+    { x: 6, y: 2 },
+    { x: 16, y: 20 }
+  ]
+];
+
+  const METADATA_CATALOG = {
+  districts: {
+    metadata: {
+      id: 'metadata',
+      name: 'Metadata Citadel',
+      subtitle: 'Schema, SObjects & Security Perimeter',
+      badgeColor: '#3b82f6',
+      icon: '🏢',
+      description: 'The declarative backbone of Salesforce. Defines standard and custom schema objects, relationships, fields, validation logic, and the security trust perimeter (Profiles, Permission Sets, FLS, and OWD).'
+    },
+    automation: {
+      id: 'automation',
+      name: 'Logic & Automation Grid',
+      subtitle: 'Apex, Flows & Event-Driven Engine',
+      badgeColor: '#eab308',
+      icon: '⚡',
+      description: 'The execution powerhouse. Orchestrates business rules through transactional Apex (WITH USER_MODE), asynchronous queues, autolaunched Flows, and high-throughput Platform Events.'
+    },
+    semantic: {
+      id: 'semantic',
+      name: 'Data Cloud & Semantic Harbor',
+      subtitle: 'DLOs, DMOs, Identity Resolution & Vectors',
+      badgeColor: '#06b6d4',
+      icon: '🌊',
+      description: 'The semantic context layer. Ingests poly-cloud data into Data Lake Objects (DLOs), harmonizes them into Data Model Objects (DMOs), unifies identities into a Golden Record, computes Calculated Insights, and indexes unstructured assets into Vector RAG.'
+    },
+    headless: {
+      id: 'headless',
+      name: 'Headless 360 Skyport',
+      subtitle: 'Decoupled HXL, GraphQL & Composable APIs',
+      badgeColor: '#10b981',
+      icon: '🚀',
+      description: 'The API is the UI. Decouples the Customer 360 from browser DOMs (LEX), powering headless experiences across Slack, mobile consoles, custom React frontends, and external client agents with microsecond latency.'
+    },
+    agentforce: {
+      id: 'agentforce',
+      name: 'Agentforce Autonomous Hub',
+      subtitle: 'Atlas Reasoning Engine, Topics & Guardrails',
+      badgeColor: '#8b5cf6',
+      icon: '🤖',
+      description: 'Salesforce autonomous AI agent headquarters. Powered by the Atlas Reasoning Engine, orchestrating autonomous SDR and service coworkers (like Kaveri) grounded in Data Cloud and governed by the Einstein Trust Layer.'
+    },
+    claudeforce: {
+      id: 'claudeforce',
+      name: 'Claudeforce Research Complex',
+      subtitle: 'Anthropic Claude 3.5 Multi-Modal Co-Intelligence',
+      badgeColor: '#f97316',
+      icon: '🧠',
+      description: 'Advanced cognitive observatory fusing Anthropic Claude 3.5 Sonnet and Haiku with Salesforce. Excels at multi-modal document reasoning (invoices, manifests, PDFs), deep Apex code synthesis, and natural language SOQL.'
+    },
+    mcp: {
+      id: 'mcp',
+      name: 'MCP & API Interchange',
+      subtitle: 'Dual-Plane MCP Servers & Modern Protocols',
+      badgeColor: '#ec4899',
+      icon: '🔌',
+      description: 'The universal AI-CRM connective tissue. Implements the Dual-Plane Model Context Protocol (Plane 1 Data 360 for Context, Plane 2 Headless 360 for Action), along with GraphQL, Tooling, Composite, and Pub/Sub gRPC APIs.'
+    }
+  },
+
+  buildings: [
+    {
+      id: 'b_standard_objects',
+      districtId: 'metadata',
+      name: 'Standard Objects Tower',
+      type: 'skyscraper',
+      subtitle: 'Account, Contact, Opportunity, Case, Lead',
+      floors: 64,
+      gridX: 4,
+      gridY: 4,
+      width: 2,
+      height: 2,
+      color: '#3b82f6',
+      roofType: 'antenna',
+      relationships: ['b_custom_objects', 'b_security_fortress', 'b_flow_powerhouse'],
+      tags: ['SObject', 'Schema', 'Core CRM', 'Relational'],
+      summary: 'The bedrock relational entities powering CRM data structures, standard relationship graphs, and transactional auditing.',
+      metrics: { records: '1.4M', fields: 420, relationships: 18, apiVersions: 'v66.0' },
+      schemaSnippet: `<!-- Account.object-meta.xml -->
+<CustomObject xmlns="http://soap.sforce.com/2006/04/metadata">
+    <enableFeeds>true</enableFeeds>
+    <enableHistory>true</enableHistory>
+    <sharingModel>Private</sharingModel>
+    <fields>
+        <fullName>Industry_Vertical__c</fullName>
+        <type>Picklist</type>
+        <valueSet>
+            <valueSetDefinition>
+                <value><fullName>ColdChain_Logistics</fullName><default>true</default></value>
+                <value><fullName>Biotech_LifeSciences</fullName><default>false</default></value>
+                <value><fullName>Depot_Energy</fullName><default>false</default></value>
+            </valueSetDefinition>
+        </valueSet>
+    </fields>
+</CustomObject>`,
+      explanation: 'Standard Objects form the core domain models of Salesforce CRM. Each object is fully auditable with Field History Tracking, System Modstamp, and deterministic relationships (Lookups and Master-Detail).'
+    },
+    {
+      id: 'b_custom_objects',
+      districtId: 'metadata',
+      name: 'Custom Objects Works (__c)',
+      type: 'factory',
+      subtitle: 'INDRA_Shipment__c, Depot_Asset__c, Sensor_Reading__c',
+      floors: 32,
+      gridX: 2,
+      gridY: 7,
+      width: 2,
+      height: 2,
+      color: '#2563eb',
+      roofType: 'smokestack',
+      relationships: ['b_standard_objects', 'b_data_lake', 'b_apex_foundry'],
+      tags: ['Custom SObject', 'Schema', 'Foreign Keys', '__c'],
+      summary: 'Custom schema factory tailoring Salesforce to specific enterprise domains like freight linehauls, cold-chain telemetry, and EV chargers.',
+      metrics: { customObjects: 48, customFields: 680, junctionObjects: 6 },
+      schemaSnippet: `// SOQL Query for Custom Object Relationship Graph
+SELECT Id, Name, INDRA_Consignee__r.Name, 
+       INDRA_Origin_Depot__r.Depot_Code__c,
+       INDRA_Temp_Excursion_Flag__c,
+       (SELECT Id, StageName, Amount FROM Opportunities__r)
+FROM INDRA_Shipment__c
+WHERE INDRA_Status__c = 'In_Transit'
+  AND INDRA_Priority__c = 'Critical_Medical'`,
+      explanation: 'Custom Objects (__c) extend Salesforce with bespoke tables, rollup summary fields, formula fields, and Master-Detail cascades that enforce referential integrity across business units.'
+    },
+    {
+      id: 'b_security_fortress',
+      districtId: 'metadata',
+      name: 'Security & Governance Citadel',
+      type: 'fortress',
+      subtitle: 'Profiles, Permission Sets, FLS & OWD Moat',
+      floors: 40,
+      gridX: 6,
+      gridY: 2,
+      width: 2,
+      height: 2,
+      color: '#1d4ed8',
+      roofType: 'dome',
+      relationships: ['b_standard_objects', 'b_headless_gateway', 'b_mcp_headless'],
+      tags: ['Security', 'FLS', 'OWD', 'PermSets', 'Shield'],
+      summary: 'Enforces the enterprise trust perimeter. Field-Level Security (FLS), Row-Level Sharing, and Session-based Permission Sets guarantee zero unauthorized data leakage.',
+      metrics: { permSets: 84, sharingRules: 32, owdStrictness: 'High (Private)', shieldActive: true },
+      schemaSnippet: `<!-- Harbor_Care_Concierge.permissionset-meta.xml -->
+<PermissionSet xmlns="http://soap.sforce.com/2006/04/metadata">
+    <hasActivationRequired>false</hasActivationRequired>
+    <label>Harbor Care Concierge Specialist</label>
+    <fieldPermissions>
+        <editable>true</editable>
+        <field>INDRA_Shipment__c.Temp_Excursion_Flag__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <objectPermissions>
+        <allowCreate>true</allowCreate>
+        <allowDelete>false</allowDelete>
+        <allowEdit>true</allowEdit>
+        <allowRead>true</allowRead>
+        <object>INDRA_Shipment__c</object>
+    </objectPermissions>
+</PermissionSet>`,
+      explanation: 'Salesforce security applies multi-layered enforcement: Org-Wide Defaults (OWD) establish the baseline privacy, Role Hierarchies open vertical access, Sharing Rules provide lateral access, and Permission Sets control FLS and CRUD per field.'
+    },
+    {
+      id: 'b_flow_powerhouse',
+      districtId: 'automation',
+      name: 'Flow Hydro-Automation Plant',
+      type: 'substation',
+      subtitle: 'Record-Triggered, Screen & Orchestrator Flows',
+      floors: 28,
+      gridX: 11,
+      gridY: 3,
+      width: 2,
+      height: 2,
+      color: '#eab308',
+      roofType: 'solar',
+      relationships: ['b_apex_foundry', 'b_events_hub', 'b_agentforce_core'],
+      tags: ['Flow', 'Declarative Logic', 'Orchestration', 'Async'],
+      summary: 'Visual declarative execution engine processing millions of transactions per day, with sub-flow modularity and deterministic rollback capabilities.',
+      metrics: { activeFlows: 112, orchestrations: 8, avgExecTime: '34ms' },
+      schemaSnippet: `<!-- Flow Definition (Snippet) -->
+<Flow xmlns="http://soap.sforce.com/2006/04/metadata">
+    <apiVersion>66.0</apiVersion>
+    <processType>AutoLaunchedFlow</processType>
+    <start>
+        <object>INDRA_Shipment__c</object>
+        <recordTriggerType>Update</recordTriggerType>
+        <triggerType>RecordAfterSave</triggerType>
+        <filters>
+            <field>Temp_Excursion_Flag__c</field>
+            <operator>EqualTo</operator>
+            <value><booleanValue>true</booleanValue></value>
+        </filters>
+    </start>
+    <actionCalls>
+        <name>Trigger_Harbor_Care_Rescue</name>
+        <actionName>INDRA_UnifiedContextService</actionName>
+        <actionType>apex</actionType>
+    </actionCalls>
+</Flow>`,
+      explanation: 'Flows provide declarative visual automation. Record-Triggered Flows run Before-Save (for high-speed field updates) and After-Save (for cross-object logic and publishing Platform Events).'
+    },
+    {
+      id: 'b_apex_foundry',
+      districtId: 'automation',
+      name: 'Apex Foundry & Queueables',
+      type: 'foundry',
+      subtitle: 'Service Layer (WITH USER_MODE), Batch & Triggers',
+      floors: 50,
+      gridX: 14,
+      gridY: 5,
+      width: 2,
+      height: 2,
+      color: '#ca8a04',
+      roofType: 'antenna',
+      relationships: ['b_flow_powerhouse', 'b_mcp_headless', 'b_claudeforce_lab'],
+      tags: ['Apex', 'OOP', 'WITH USER_MODE', 'Batchable', 'Queueable'],
+      summary: 'The strongly-typed Java-like execution engine running in multi-tenant isolation, enforcing governor limits, heap boundaries, and secure query modes.',
+      metrics: { codeCoverage: '94%', classes: 320, triggers: 12, queueableDepth: 5 },
+      schemaSnippet: `public with sharing class INDRA_UnifiedContextService {
+    @InvocableMethod(label='Dispatch Cold-Chain Rescue' category='Agentforce')
+    public static List<RescueResult> executeRescue(List<RescueRequest> requests) {
+        List<RescueResult> results = new List<RescueResult>();
+        for (RescueRequest req : requests) {
+            // Enforce compile-time user mode security
+            INDRA_Care_Case__c careCase = new INDRA_Care_Case__c(
+                Shipment__c = req.shipmentId,
+                Severity__c = 'Critical_P0',
+                Protocol__c = 'GHMC_Monsoon_Rescue'
+            );
+            insert as user careCase;
+            
+            // Fire event for real-time Headless 360 notification
+            EventBus.publish(new INDRA_Care_Signal__e(
+                Case_Id__c = careCase.Id,
+                Household_Id__c = req.householdId
+            ));
+            results.add(new RescueResult(careCase.Id, true));
+        }
+        return results;
+    }
+}`,
+      explanation: 'Apex code powers complex backend enterprise logic. Modern best practices enforce "WITH USER_MODE" and "as user" syntax to automatically respect Field-Level Security and Sharing Rules without manual checks.'
+    },
+    {
+      id: 'b_events_hub',
+      districtId: 'automation',
+      name: 'Platform Event Bus & CDC Relay',
+      type: 'transmitter',
+      subtitle: 'High-Volume Events, Change Data Capture & Pub/Sub',
+      floors: 36,
+      gridX: 9,
+      gridY: 7,
+      width: 2,
+      height: 2,
+      color: '#a16207',
+      roofType: 'radar',
+      relationships: ['b_flow_powerhouse', 'b_headless_gateway', 'b_mcp_headless'],
+      tags: ['Platform Events', 'CDC', 'Event-Driven', 'Kafka Backbone', 'gRPC'],
+      summary: 'The event-driven messaging backbone built on Apache Kafka, broadcasting state changes to external subscribers with 72-hour replay retention.',
+      metrics: { eventsPerDay: '8.4M', latency: '12ms', retentionHours: 72 },
+      schemaSnippet: `<!-- INDRA_Care_Signal__e.object-meta.xml -->
+<CustomObject xmlns="http://soap.sforce.com/2006/04/metadata">
+    <deploymentStatus>Deployed</deploymentStatus>
+    <eventType>HighVolume</eventType>
+    <label>INDRA Care Signal</label>
+    <fields>
+        <fullName>Household_Id__c</fullName>
+        <type>Text</type>
+        <length>50</length>
+    </fields>
+    <fields>
+        <fullName>Payload_JSON__c</fullName>
+        <type>LongTextArea</type>
+        <length>131072</length>
+    </fields>
+</CustomObject>`,
+      explanation: 'Platform Events decouple producers and consumers. External microservices subscribe via the modern Pub/Sub API over gRPC, streaming delta events without polling.'
+    },
+    {
+      id: 'b_data_lake',
+      districtId: 'semantic',
+      name: 'Data Lake Reservoirs (DLOs)',
+      type: 'lake_docks',
+      subtitle: 'Raw Streaming & Batch Ingestion from Poly-Clouds',
+      floors: 24,
+      gridX: 19,
+      gridY: 3,
+      width: 3,
+      height: 2,
+      color: '#06b6d4',
+      roofType: 'water_basin',
+      relationships: ['b_harmonizer', 'b_calculated_insights', 'b_mcp_context'],
+      tags: ['Data Cloud', 'DLO', 'Zero-Copy', 'Lakehouse', 'BigQuery'],
+      summary: 'Ingests petabyte-scale telemetry, Snowflake/BigQuery Zero-Copy shares, IoT telematics, and web clickstreams into raw immutable Data Lake Objects.',
+      metrics: { ingestedGB: '480 TB', streams: 14, zeroCopyShares: 4 },
+      schemaSnippet: `// Data Lake Object (DLO) Schema Mapping
+{
+  "dlo_name": "DLO_Shipment_Telemetry__dll",
+  "source": "Kafka_Fleet_Telemetry_Topic",
+  "fields": [
+    { "name": "Telemetry_UUID", "type": "Text", "pk": true },
+    { "name": "Depot_ID", "type": "Text" },
+    { "name": "Temp_Celsius", "type": "Number" },
+    { "name": "Grid_Load_kW", "type": "Number" },
+    { "name": "Ingestion_Timestamp", "type": "DateTime" }
+  ]
+}`,
+      explanation: 'Data Lake Objects (DLOs) preserve raw data as ingested from external sources without mutation, supporting real-time streaming ingestion and Zero-Copy data virtualization from Snowflake or Google BigQuery.'
+    },
+    {
+      id: 'b_harmonizer',
+      districtId: 'semantic',
+      name: 'Identity Resolution & DMO Refinery',
+      type: 'refinery',
+      subtitle: 'Unified Individual Graph, Golden Record & Standard DMOs',
+      floors: 45,
+      gridX: 21,
+      gridY: 7,
+      width: 2,
+      height: 2,
+      color: '#0891b2',
+      roofType: 'pipes',
+      relationships: ['b_data_lake', 'b_vector_vault', 'b_mcp_context'],
+      tags: ['Semantic Layer', 'DMO', 'Identity Resolution', 'Golden Record', 'Graph'],
+      summary: 'Harmonizes raw DLOs into the CIM (Cloud Information Model) Standard DMOs and runs probabilistic & deterministic rules to unify fragmented customer identities into a single Golden Record.',
+      metrics: { matchRate: '96.2%', unifiedIndividuals: '420K', rulesActive: 5 },
+      schemaSnippet: `// Identity Resolution Rule Spec
+{
+  "ruleset": "Unified_Individual_Ruleset",
+  "match_rules": [
+    {
+      "type": "Deterministic",
+      "fields": ["NormalizedPhone_E164", "NormalizedEmail"]
+    },
+    {
+      "type": "Probabilistic",
+      "fields": ["FuzzyName_JaroWinkler_0.85", "ExactPostalCode"]
+    }
+  ],
+  "survivorship": {
+    "Name": "MostFrequentlyOccurring",
+    "ContactPoints": "PreserveAllActiveVerified"
+  }
+}`,
+      explanation: 'Identity Resolution bridges the gap between B2B and B2C identities. A single individual (e.g. Dr. Meera Reddy) across an enterprise CRM contact, an e-commerce consignee, and a clinic account is unified into a single Unified Individual UID.'
+    },
+    {
+      id: 'b_vector_vault',
+      districtId: 'semantic',
+      name: 'Vector & Embedding RAG Vault',
+      type: 'vault',
+      subtitle: 'Semantic Search, Hybrid RAG & Knowledge Embeddings',
+      floors: 38,
+      gridX: 18,
+      gridY: 8,
+      width: 2,
+      height: 2,
+      color: '#0e7490',
+      roofType: 'crystal',
+      relationships: ['b_harmonizer', 'b_agentforce_core', 'b_claudeforce_lab'],
+      tags: ['Vector DB', 'RAG', 'Embeddings', 'Unstructured Data', 'Semantic'],
+      summary: 'Stores high-dimensional vector embeddings of enterprise SOPs, flood contingency protocols, and clinical service guidelines to ground AI agents without hallucination.',
+      metrics: { vectorDimensions: 1536, indexedDocs: 12400, searchLatency: '18ms' },
+      schemaSnippet: `// Hybrid Vector RAG Query via Data Cloud Search API
+POST /api/v1/search/retrievers/SOP_ColdChain_Retriever/query
+{
+  "query": "Waterlogging protocol cold-chain temperature excursion Banjara Hills",
+  "topK": 3,
+  "filter": "Document_Type__c = 'Disaster_SOP'",
+  "hybrid_weights": {
+    "dense_vector": 0.7,
+    "bm25_keyword": 0.3
+  }
+}`,
+      explanation: 'Vector Search indexes unstructured PDFs, knowledge articles, and manuals. When an AI agent encounters a real-world exception, it retrieves chunked context with semantic similarity to ground reasoning.'
+    },
+    {
+      id: 'b_calculated_insights',
+      districtId: 'semantic',
+      name: 'Calculated Insights Lighthouse',
+      type: 'lighthouse',
+      subtitle: 'Real-Time Cross-Cloud Aggregation & Care Risk Scores',
+      floors: 55,
+      gridX: 23,
+      gridY: 4,
+      width: 2,
+      height: 2,
+      color: '#155e75',
+      roofType: 'beacon',
+      relationships: ['b_data_lake', 'b_harmonizer', 'b_agentforce_core'],
+      tags: ['Calculated Insights', 'SQL', 'Metrics', 'Real-Time Scoring', 'Streaming'],
+      summary: 'Continuously aggregates cross-cloud metrics across billions of records, delivering real-time scores (such as Household Care Risk and Depot Grid Stress) directly to agents.',
+      metrics: { activeCIs: 34, refreshFrequency: 'Streaming & 1-Hour Batch' },
+      schemaSnippet: `// Calculated Insight SQL Definition
+SELECT 
+    UnifiedIndividual__dlm.Id__c as UnifiedId__c,
+    MAX(INDRA_Shipment__dlm.Temp_Excursion__c) as MaxTempExcursion__c,
+    COUNT(Case__dlm.Id__c) as RecentCasesCount__c,
+    (COUNT(Case__dlm.Id__c) * 1.5 + MAX(INDRA_Shipment__dlm.Temp_Excursion__c) * 4.0) as HouseholdCareRiskScore__c
+FROM UnifiedIndividual__dlm
+JOIN INDRA_Shipment__dlm ON UnifiedIndividual__dlm.Id__c = INDRA_Shipment__dlm.ConsigneeId__c
+GROUP BY UnifiedIndividual__dlm.Id__c`,
+      explanation: 'Calculated Insights (CIs) run multi-dimensional SQL aggregation over petabytes of data, turning raw event streams into actionable numeric signals that trigger business flows and Agentforce reasoning loops.'
+    },
+    {
+      id: 'b_headless_gateway',
+      districtId: 'headless',
+      name: 'Headless 360 API Gateway',
+      type: 'skyport',
+      subtitle: 'GraphQL, REST Composite & Composable Endpoints',
+      floors: 42,
+      gridX: 3,
+      gridY: 15,
+      width: 2,
+      height: 2,
+      color: '#10b981',
+      roofType: 'helipad',
+      relationships: ['b_security_fortress', 'b_events_hub', 'b_hxl_terminals'],
+      tags: ['Headless 360', 'GraphQL', 'Composite API', 'The API is the UI', 'REST'],
+      summary: 'The primary ingress/egress terminal liberating Salesforce data and business logic from the Lightning Experience DOM, powering zero-browser micro-frontends and mobile apps.',
+      metrics: { avgRoundtrip: '48ms', throughputRps: '2,800', bandwidthSaved: '88%' },
+      schemaSnippet: `// Headless 360 GraphQL Query: Multi-Object Single Roundtrip
+query getConsigneeRescueContext($shipmentNumber: String!) {
+  uiapi {
+    query {
+      INDRA_Shipment__c(where: { Shipment_Number__c: { eq: $shipmentNumber } }) {
+        edges {
+          node {
+            Id
+            Temp_Excursion_Flag__c { value }
+            Consignee__r {
+              Name { value }
+              Phone { value }
+            }
+          }
+        }
+      }
+    }
+  }
+}`,
+      explanation: 'Headless 360 removes the heavy browser UI layer. Instead of downloading multi-megabyte JavaScript bundles for Lightning components, clients query exactly what they need in a single HTTP roundtrip.'
+    },
+    {
+      id: 'b_hxl_terminals',
+      districtId: 'headless',
+      name: 'Headless Experience Layer (HXL)',
+      type: 'docking_bays',
+      subtitle: 'Slack Concierge, Mobile Ops & External AI Surfaces',
+      floors: 30,
+      gridX: 6,
+      gridY: 18,
+      width: 3,
+      height: 2,
+      color: '#059669',
+      roofType: 'antennas_array',
+      relationships: ['b_headless_gateway', 'b_agentforce_core', 'b_mcp_headless'],
+      tags: ['HXL', 'Slack Bot', 'React Micro-Frontend', 'Mobile Console', 'Zero-UI'],
+      summary: 'Outbound surfaces where human coworkers and AI agents collaborate seamlessly without ever logging into a traditional Salesforce browser tab.',
+      metrics: { surfacesConnected: 6, slackUsers: 1400, mobileFleetDevices: 280 },
+      schemaSnippet: `// Slack Socket Mode Event Handler (HXL Node)
+slackApp.action('approve_shipment_reroute', async ({ ack, body, client }) => {
+    await ack();
+    // Dispatch direct tool call to Headless 360 without touching Salesforce UI
+    const result = await headlessMcp.dispatch('execute_rescue_action', {
+        caseId: body.actions[0].value,
+        approverId: body.user.id
+    });
+    await client.chat.postMessage({
+        channel: body.channel.id,
+        text: '✅ Rescue flight dispatched! Tracking code: ' + result.trackingId
+    });
+});`,
+      explanation: 'The Headless Experience Layer proves "The API is the UI". Operations teams manage mission-critical logistics entirely inside Slack, dedicated field tablet apps, or automated agent loops.'
+    },
+    {
+      id: 'b_agentforce_core',
+      districtId: 'agentforce',
+      name: 'Atlas Reasoning Engine Spire',
+      type: 'ai_spire',
+      subtitle: 'Autonomous Perception, Topic Routing & Action Planning',
+      floors: 72,
+      gridX: 12,
+      gridY: 12,
+      width: 3,
+      height: 3,
+      color: '#8b5cf6',
+      roofType: 'pulsing_orb',
+      relationships: ['b_vector_vault', 'b_calculated_insights', 'b_trust_layer'],
+      tags: ['Agentforce', 'Atlas Engine', 'Topics', 'Reasoning Loop', 'Autonomous'],
+      summary: 'The cognitive heart of Agentforce. Continuously runs the Atlas loop: Perceives customer intent, evaluates guardrails, selects topics, grounds in Data Cloud, plans actions, and executes Apex tools.',
+      metrics: { activeAgents: 4, tasksAutonomousPct: '88.4%', avgResolutionSec: 4.2 },
+      schemaSnippet: `// Agentforce Atlas Topic & Action Definition (Metadata YAML)
+agent:
+  name: "Kaveri_Harbor_Care_Coworker"
+  description: "Autonomous concierge handling cold-chain excursions and logistics disruptions."
+  topics:
+    - name: "ColdChain_Rescue"
+      description: "Handles depot temperature spikes and flood rerouting."
+      classification_rules:
+        - "temp > 8C in transit"
+        - "monsoon waterlogging alert"
+      actions:
+        - name: "Query_Unified_Household"
+          target: "Data360_MCP.execute"
+        - name: "Create_Rescue_Case"
+          target: "Headless360_MCP.dispatch"
+      guardrails:
+        - "Do not commit financial compensation over $500 without supervisor"`,
+      explanation: 'Unlike deterministic chatbots that follow rigid decision trees, the Atlas Reasoning Engine reasons dynamically. It breaks complex prompts down into a sequence of safe, governed tool invocations.'
+    },
+    {
+      id: 'b_trust_layer',
+      districtId: 'agentforce',
+      name: 'Einstein Trust Layer Bastion',
+      type: 'shield_dome',
+      subtitle: 'Zero Data Retention, PII Masking & Toxicity Defense',
+      floors: 25,
+      gridX: 10,
+      gridY: 15,
+      width: 2,
+      height: 2,
+      color: '#7c3aed',
+      roofType: 'forcefield',
+      relationships: ['b_agentforce_core', 'b_claudeforce_lab', 'b_security_fortress'],
+      tags: ['Trust Layer', 'PII Masking', 'Zero Retention', 'Audit Trail', 'Guardrails'],
+      summary: 'Enterprise security perimeter wrapping all generative and agentic model calls. Strips sensitive PII before model transmission, prevents model training, and logs every reasoning step.',
+      metrics: { piiEntitiesMasked: '1.2M', toxicityBlocks: 42, auditCompliance: '100%' },
+      schemaSnippet: `// Einstein Trust Layer Pipeline
+1. Inbound Request -> Detect PII (SSN, Credit Card, Medical ID)
+2. Mask with Secure Synthetic Tokens: "Dr. [NAME_1] at [ADDR_2]"
+3. Check Harm & Toxicity Classifier (Score < 0.05)
+4. Dynamic Grounding: Inject RAG chunks from Data Cloud Vector Vault
+5. Enforce Zero-Retention Agreement with LLM Gateway
+6. De-mask tokens in final response & log full audit trail to BigObject`,
+      explanation: 'The Einstein Trust Layer guarantees that enterprise customer data is never used to train external LLMs, ensuring strict adherence to HIPAA, GDPR, and enterprise NDA agreements.'
+    },
+    {
+      id: 'b_claudeforce_lab',
+      districtId: 'claudeforce',
+      name: 'Claude 3.5 Cognitive Observatory',
+      type: 'observatory',
+      subtitle: 'Deep Architectural Reasoning, SOQL Synthesis & Multi-Modal',
+      floors: 60,
+      gridX: 17,
+      gridY: 13,
+      width: 2,
+      height: 2,
+      color: '#f97316',
+      roofType: 'rotating_dome',
+      relationships: ['b_agentforce_core', 'b_apex_foundry', 'b_trust_layer'],
+      tags: ['Claudeforce', 'Claude 3.5 Sonnet', 'Multi-Modal', 'Code Generation', 'Reasoning'],
+      summary: 'Anthropic Claude integration with Salesforce. Excels at processing 200k context windows of messy enterprise documents, refactoring legacy Apex, and generating performant SOQL.',
+      metrics: { contextWindow: '200,000 tokens', apexGenerationAccuracy: '98.6%', visionLatency: '820ms' },
+      schemaSnippet: `// Claudeforce Agentic Multi-Modal Workflow (Prompt + Vision)
+const result = await anthropic.messages.create({
+    model: "claude-3-5-sonnet-20241022",
+    max_tokens: 4096,
+    system: "You are Claudeforce, an elite Salesforce Technical Architect. Enforce WITH USER_MODE, bulkification, and SOQL governor limits in all generated code.",
+    messages: [{
+        role: "user",
+        content: [
+            { type: "text", text: "Parse this bill of lading photo and verify cold-chain compliance:" },
+            { type: "image", source: { type: "base64", media_type: "image/jpeg", data: bolImageBase64 } }
+        ]
+    }]
+});`,
+      explanation: 'Claudeforce leverages Claude 3.5 Sonnet\'s frontier intelligence for complex enterprise scenarios: parsing handwritten shipping manifests, cross-referencing multi-page contracts, and auditing Apex triggers for governor limit violations.'
+    },
+    {
+      id: 'b_mcp_context',
+      districtId: 'mcp',
+      name: 'Plane 1: Data 360 MCP Server',
+      type: 'maglev_terminal',
+      subtitle: 'System of Context [search | payload_examples | execute]',
+      floors: 48,
+      gridX: 20,
+      gridY: 17,
+      width: 2,
+      height: 2,
+      color: '#ec4899',
+      roofType: 'maglev_track',
+      relationships: ['b_data_lake', 'b_harmonizer', 'b_agentforce_core'],
+      tags: ['MCP', 'Data 360', 'System of Context', 'search', 'execute'],
+      summary: 'Hosted Model Context Protocol server exposing the entire enterprise semantic layer (DLOs, DMOs, Identity Resolution, and Calculated Insights) as standardized LLM tools.',
+      metrics: { toolsExposed: 3, endpoint: 'api.salesforce.com/platform/mcp/v1/data/data360', status: 'GA' },
+      schemaSnippet: `// Plane 1: Data 360 MCP Server Meta-Tools
+1. "data360_search":
+   Query available DMOs, Calculated Insights, and Semantic models.
+2. "data360_payload_examples":
+   Inspect sample schemas and query parameters for selected models.
+3. "data360_execute":
+   Execute parameterized SQL/GraphQL queries against the Data 360 graph.`,
+      explanation: 'Plane 1 acts as the System of Context. When an AI client needs to understand customer background, household relationships, or real-time metrics, it queries the Data 360 MCP server.'
+    },
+    {
+      id: 'b_mcp_headless',
+      districtId: 'mcp',
+      name: 'Plane 2: Headless 360 MCP Server',
+      type: 'maglev_terminal',
+      subtitle: 'System of Action [discover | describe | dispatch]',
+      floors: 48,
+      gridX: 16,
+      gridY: 20,
+      width: 2,
+      height: 2,
+      color: '#db2777',
+      roofType: 'maglev_track',
+      relationships: ['b_security_fortress', 'b_apex_foundry', 'b_agentforce_core'],
+      tags: ['MCP', 'Headless 360', 'System of Action', 'dispatch', 'FLS Enforced'],
+      summary: 'Hosted Model Context Protocol server exposing Salesforce platform capabilities (SObjects, Apex, Flows, Platform Events) as action tools, running strictly as the authenticated user.',
+      metrics: { toolsExposed: 4, endpoint: 'api.salesforce.com/platform/mcp/v1/platform/headless-360', status: 'Beta' },
+      schemaSnippet: `// Plane 2: Headless 360 MCP Server Meta-Tools
+1. "headless360_discover":
+   List available actions, SObjects, and invocable flows accessible to user.
+2. "headless360_describe":
+   Get typed parameter schemas for a target SObject or Apex invocable.
+3. "headless360_dispatch":
+   Execute state-modifying actions (insert, update, flow call, publish event).
+4. "headless360_dispatch_readonly":
+   Execute read-only SOQL queries with compile-time security.`,
+      explanation: 'Plane 2 acts as the System of Action. Collapsing Plane 1 and Plane 2 is an architectural anti-pattern. While Plane 1 reads context, Plane 2 executes governed actions under strict user FLS, sharing rules, and audit logging.'
+    }
+  ],
+
+  // Data conduits connecting buildings
+  conduits: [
+    { from: 'b_standard_objects', to: 'b_custom_objects', type: 'metadata', label: 'Lookup / Master-Detail Rel' },
+    { from: 'b_standard_objects', to: 'b_security_fortress', type: 'metadata', label: 'FLS & Sharing Boundary' },
+    { from: 'b_custom_objects', to: 'b_apex_foundry', type: 'automation', label: 'Trigger Pipeline' },
+    { from: 'b_flow_powerhouse', to: 'b_events_hub', type: 'automation', label: 'Platform Event Fire' },
+    { from: 'b_apex_foundry', to: 'b_flow_powerhouse', type: 'automation', label: 'Invocable Apex Calls' },
+    { from: 'b_custom_objects', to: 'b_data_lake', type: 'semantic', label: 'Data Ingestion Stream' },
+    { from: 'b_data_lake', to: 'b_harmonizer', type: 'semantic', label: 'DLO -> DMO Harmonize' },
+    { from: 'b_harmonizer', to: 'b_calculated_insights', type: 'semantic', label: 'Continuous Aggregation' },
+    { from: 'b_harmonizer', to: 'b_vector_vault', type: 'semantic', label: 'Vector RAG Embeddings' },
+    { from: 'b_vector_vault', to: 'b_agentforce_core', type: 'agentforce', label: 'Context Grounding' },
+    { from: 'b_calculated_insights', to: 'b_agentforce_core', type: 'agentforce', label: 'Care Risk Score Triggers' },
+    { from: 'b_agentforce_core', to: 'b_trust_layer', type: 'agentforce', label: 'Guardrail & Masking Gate' },
+    { from: 'b_agentforce_core', to: 'b_claudeforce_lab', type: 'claudeforce', label: 'Frontier Co-Pilot Request' },
+    { from: 'b_agentforce_core', to: 'b_mcp_context', type: 'mcp', label: 'Plane 1 Read Context' },
+    { from: 'b_agentforce_core', to: 'b_mcp_headless', type: 'mcp', label: 'Plane 2 Dispatch Action' },
+    { from: 'b_mcp_headless', to: 'b_headless_gateway', type: 'headless', label: 'Headless 360 Dispatch' },
+    { from: 'b_headless_gateway', to: 'b_hxl_terminals', type: 'headless', label: 'Slack & Mobile HXL' }
+  ],
+
+  simulations: [
+    {
+      id: 'sim_cold_chain_rescue',
+      title: 'Monsoon Cold-Chain Emergency Rescue',
+      badge: 'Agentforce + Dual MCPs',
+      description: 'IoT sensor detects 9.2°C temperature spike on Biologics shipment. Demonstrates Data 360 event ingestion -> Atlas reasoning loop -> Headless 360 MCP dispatch -> Slack Concierge notification.',
+      steps: [
+        {
+          district: 'semantic',
+          buildingId: 'b_data_lake',
+          action: '1. Ingest IoT Excursion Stream',
+          detail: 'Sensor DC-HYD-04 records 9.2°C (exceeding 8°C threshold) for Shipment SH-88392.'
+        },
+        {
+          district: 'semantic',
+          buildingId: 'b_harmonizer',
+          action: '2. Identity Resolution Match',
+          detail: 'Harmonizes consignee to Dr. Meera Reddy (Household node) with Critical SLA.'
+        },
+        {
+          district: 'automation',
+          buildingId: 'b_events_hub',
+          action: '3. Kafka Event Bus Broadcast',
+          detail: 'Data Action publishes INDRA_Care_Signal__e to Kafka Event Bus.'
+        },
+        {
+          district: 'agentforce',
+          buildingId: 'b_agentforce_core',
+          action: '4. Atlas Reasoning Engine Execution',
+          detail: 'Agent Kaveri assesses ColdChain_Rescue topic, evaluates GHMC flood SOPs via Vector RAG.'
+        },
+        {
+          district: 'mcp',
+          buildingId: 'b_mcp_headless',
+          action: '5. Headless 360 MCP Tool Dispatch',
+          detail: 'Calls headless360_dispatch to insert P0 Care Case and dispatch drone courier.'
+        },
+        {
+          district: 'headless',
+          buildingId: 'b_hxl_terminals',
+          action: '6. Outbound Slack Notification',
+          detail: 'Interactive Slack notification sent to #harbor-care with 1-click rescue approval.'
+        }
+      ]
+    },
+    {
+      id: 'sim_claudeforce_audit',
+      title: 'Claudeforce Multi-Modal Manifest Triage',
+      badge: 'Claude 3.5 + Governed Apex',
+      description: 'Carrier uploads handwritten bill of lading. Claude 3.5 Sonnet extracts cold-chain certifications, writes Apex unit tests, and validates compliance against Data Cloud standards.',
+      steps: [
+        {
+          district: 'claudeforce',
+          buildingId: 'b_claudeforce_lab',
+          action: '1. Multi-Modal Vision Ingestion',
+          detail: 'Claude 3.5 Sonnet parses handwritten dry-ice manifest and extracts batch serials.'
+        },
+        {
+          district: 'semantic',
+          buildingId: 'b_vector_vault',
+          action: '2. RAG Regulatory Cross-Check',
+          detail: 'Retrieves FDA & DGCA cold-chain transit regulations from Vector Vault.'
+        },
+        {
+          district: 'automation',
+          buildingId: 'b_apex_foundry',
+          action: '3. Generate WITH USER_MODE Apex',
+          detail: 'Synthesizes bulkified Apex verification handler with 100% test coverage.'
+        },
+        {
+          district: 'metadata',
+          buildingId: 'b_security_fortress',
+          action: '4. FLS & Trust Perimeter Audit',
+          detail: 'Verifies compile-time field permissions and logs to Setup Audit Trail.'
+        }
+      ]
+    }
+  ]
+};
+
+  const CONCEPT_GUIDES = {
+  headless360: {
+    id: 'headless360',
+    title: 'Headless 360: The API is the UI',
+    subtitle: 'Decoupling Customer 360 from the Browser DOM',
+    tagline: '"No browser required. High-performance, composable, agent-first CRM."',
+    icon: '🚀',
+    accentColor: '#10b981',
+    summary: 'Headless 360 is the architectural paradigm of decoupling Salesforce data, customer context, and transactional business logic from the traditional Salesforce Lightning Experience (LEX) browser interface.',
+    
+    whyItMatters: [
+      {
+        title: 'Zero-Browser Latency',
+        description: 'Traditional LEX pages transfer 12–18MB of JavaScript bundles, CSS stylesheets, and Aura/LWC components, resulting in 2-5 second rendering delays. Headless 360 APIs respond in 30-50 milliseconds with exact JSON payloads.'
+      },
+      {
+        title: 'Native AI Agent Readiness',
+        description: 'Autonomous AI agents (Agentforce, Claude, Gemini) cannot reliably interact with dynamic DOM buttons, dropdowns, and iframes. Headless 360 exposes typed, deterministic APIs and MCP tools that agents execute with mathematical precision.'
+      },
+      {
+        title: 'Bespoke Frontline Surfaces',
+        description: 'Empowers logistics coordinators in Slack, depot managers on rugged Android scanners, and e-commerce shoppers on Next.js composable storefronts to interact with Salesforce without ever logging into a Salesforce tab.'
+      }
+    ],
+
+    fourLayers: [
+      {
+        layer: 'Layer 4: Headless Experience Layer (HXL)',
+        color: '#10b981',
+        components: 'Slack Channels, React Micro-Frontends, Native iOS/Android Fleet Consoles, External AI Agents (Claude / Gemini).',
+        description: 'Omnichannel presentation layer where human coworkers and AI agents collaborate. Interacts strictly via HTTP/2, WebSocket, and MCP.'
+      },
+      {
+        layer: 'Layer 3: Orchestration Plane',
+        color: '#8b5cf6',
+        components: 'Agentforce Atlas Reasoning Engine, Prompt Templates, Guardrails, MuleSoft Agent Fabric.',
+        description: 'Decides what business actions to take. Classifies customer intent, selects topics, and orchestrates calls between context and action systems.'
+      },
+      {
+        layer: 'Layer 2: Business Logic & Platform Plane',
+        color: '#eab308',
+        components: 'Apex Services (WITH USER_MODE), Autolaunched Flows, Platform Events, CDC Relays, Headless 360 MCP Server.',
+        description: 'Enforces transactional integrity, Field-Level Security (FLS), Sharing Rules, and governor limits. Executes state updates and publishes change events.'
+      },
+      {
+        layer: 'Layer 1: Data 360 — System of Context',
+        color: '#06b6d4',
+        components: 'Data Lake Objects (DLOs), Harmonized DMOs, Identity Resolution, Calculated Insights, Vector RAG Retrievers.',
+        description: 'Unified customer graph bridging CRM records, real-time IoT telemetry, Zero-Copy lakehouse tables, and unstructured SOP knowledge.'
+      }
+    ],
+
+    comparison: {
+      monolith: {
+        title: 'Traditional Monolithic CRM (LEX)',
+        payloadSize: '14.8 MB',
+        loadTime: '2,800 ms',
+        flexibility: 'Rigid standard UI flexipages',
+        agentUsability: 'Extremely poor (brittle DOM scrapers)',
+        costPerInteraction: 'High compute + full user seat licensing'
+      },
+      headless: {
+        title: 'Headless 360 Composable Architecture',
+        payloadSize: '2.4 KB (GraphQL / JSON)',
+        loadTime: '42 ms',
+        flexibility: '100% composable (Slack, Mobile, Web, Watch)',
+        agentUsability: 'Native (Direct Model Context Protocol & Tools)',
+        costPerInteraction: 'Ultra-low (API / Flex Credit token consumption)'
+      }
+    },
+
+    sampleCode: {
+      title: 'Headless 360 GraphQL Query',
+      lang: 'graphql',
+      code: `query GetColdChainRescuePayload($shipmentId: ID!) {
+  uiapi {
+    query {
+      INDRA_Shipment__c(where: { Id: { eq: $shipmentId } }) {
+        edges {
+          node {
+            Id
+            Temp_Celsius__c { value }
+            Priority__c { value }
+            Consignee__r {
+              Name { value }
+              Phone { value }
+              Unified_Household_Id__c { value }
+            }
+          }
+        }
+      }
+    }
+  }
+}`
+    }
+  },
+
+  agentforce: {
+    id: 'agentforce',
+    title: 'Agentforce (Aiforce) & The Atlas Engine',
+    subtitle: 'Autonomous Enterprise AI Coworkers with Guardrails',
+    tagline: '"Beyond deterministic bots: Continuous reasoning, grounding, and governed action."',
+    icon: '🤖',
+    accentColor: '#8b5cf6',
+    summary: 'Agentforce is Salesforce\'s autonomous AI platform. Rather than following brittle if-then branching trees, Agentforce uses the Atlas Reasoning Engine to plan, ground, and execute business actions 24/7.',
+
+    atlasCycle: [
+      {
+        step: '1. Perception & Intent Ingestion',
+        icon: '👂',
+        description: 'Continuously listens to customer inquiries across Slack, WhatsApp, SMS, or automated IoT sensor alerts.'
+      },
+      {
+        step: '2. Trust Layer Guardrail Scan',
+        icon: '🛡️',
+        description: 'Masks sensitive PII (SSN, credit card, medical identifiers), evaluates toxicity, and validates safety boundaries.'
+      },
+      {
+        step: '3. Topic Classification',
+        icon: '🎯',
+        description: 'Dynamically routes the prompt to an enterprise Topic (e.g. ColdChain_Rescue, Order_Reroute, Billing_Dispute) with locked scope.'
+      },
+      {
+        step: '4. Semantic Context Grounding',
+        icon: '🌐',
+        description: 'Queries Data Cloud to retrieve the Unified Individual Golden Record, real-time Calculated Insights, and Vector RAG chunks.'
+      },
+      {
+        step: '5. Action Planning & Invocable Dispatch',
+        icon: '⚡',
+        description: 'Plans a deterministic sequence of Apex Invocable Methods, Autolaunched Flows, or Headless 360 MCP tool calls.'
+      },
+      {
+        step: '6. Output & Audit Logging',
+        icon: '📝',
+        description: 'Returns the governed resolution to the customer surface and logs an immutable audit entry to Salesforce BigObjects.'
+      }
+    ],
+
+    keyDifferentiators: [
+      {
+        title: 'Deterministic Guardrails with Non-Deterministic Reasoning',
+        detail: 'The LLM reasons flexibly over human intent, but the actions it can take are strictly gated by typed Salesforce Apex/Flow contracts.'
+      },
+      {
+        title: 'Unified Customer Grounding',
+        detail: 'Never hallucinates customer status because it is grounded in Data Cloud\'s unified identity graph and calculated metrics.'
+      },
+      {
+        title: 'Zero Data Retention (ZDR)',
+        detail: 'The Einstein Trust Layer guarantees customer data is never stored by or used to train third-party foundation models.'
+      }
+    ],
+
+    sampleCode: {
+      title: 'Invocable Apex Action for Agentforce',
+      lang: 'apex',
+      code: `public with sharing class INDRA_ColdChainRescueAction {
+    public class Request {
+        @InvocableVariable(required=true label='Shipment ID')
+        public Id shipmentId;
+        @InvocableVariable(required=true label='Current Temp Celsius')
+        public Decimal currentTemp;
+    }
+
+    public class Response {
+        @InvocableVariable(label='Rescue Case ID')
+        public Id caseId;
+        @InvocableVariable(label='Is Rerouted')
+        public Boolean isRerouted;
+    }
+
+    @InvocableMethod(label='Dispatch Autonomous Cold-Chain Rescue' category='Agentforce')
+    public static List<Response> execute(List<Request> requests) {
+        List<Response> resList = new List<Response>();
+        for (Request req : requests) {
+            // Apex executes securely WITH USER_MODE
+            INDRA_Care_Case__c c = new INDRA_Care_Case__c(
+                Shipment__c = req.shipmentId,
+                Status__c = 'Dispatched_Autonomous'
+            );
+            insert as user c;
+            Response r = new Response();
+            r.caseId = c.Id;
+            r.isRerouted = true;
+            resList.add(r);
+        }
+        return resList;
+    }
+}`
+    }
+  },
+
+  claudeforce: {
+    id: 'claudeforce',
+    title: 'Claudeforce: Claude 3.5 + Salesforce',
+    subtitle: 'Frontier Intelligence for Enterprise Architecture & Automation',
+    tagline: '"200k context, multimodal document comprehension, and governed code generation."',
+    icon: '🧠',
+    accentColor: '#f97316',
+    summary: 'Claudeforce embodies the deep synergy between Anthropic Claude 3.5 Sonnet / Haiku and Salesforce CRM. It delivers architectural reasoning, multi-modal document intelligence, and enterprise-grade code synthesis.',
+
+    corePowers: [
+      {
+        title: '200,000 Token Context Window',
+        description: 'Ingest an entire Salesforce org\'s schema, metadata relationships, and 50+ Apex classes in a single prompt to audit architecture or identify anti-patterns.'
+      },
+      {
+        title: 'Multi-Modal Vision Understanding',
+        description: 'Parse messy handwritten bills of lading, customs clearance stamps, cold-chain temperature strip charts, and warehouse damage photos directly into structured SObject records.'
+      },
+      {
+        title: 'Governor-Compliant Code Synthesis',
+        description: 'Generates robust Apex code strictly complying with Salesforce multi-tenant limits: 100 SOQL queries, 150 DML statements, bulkification, and modern WITH USER_MODE syntax.'
+      },
+      {
+        title: 'Natural Language to Optimized SOQL',
+        description: 'Converts complex business questions ("Which high-value accounts in Hyderabad had shipments delayed by rain this week?") into index-optimized SOQL queries with selective WHERE clauses.'
+      }
+    ],
+
+    workflowExample: [
+      { step: 'Step 1: Manifest Upload', text: 'Truck driver snaps a smartphone photo of physical BOL with dry-ice log.' },
+      { step: 'Step 2: Claude Multi-Modal Parse', text: 'Claude 3.5 Sonnet extracts batch serials, origin lab, expiry timestamps, and certifies signatures.' },
+      { step: 'Step 3: Schema Mapping', text: 'Synthesizes JSON payload matching INDRA_Shipment__c and ColdChain_Reading__c custom fields.' },
+      { step: 'Step 4: Tool Execution', text: 'Dispatches payload via Headless 360 MCP server with compile-time security.' }
+    ],
+
+    sampleCode: {
+      title: 'Claudeforce Prompt Grounding Template',
+      lang: 'json',
+      code: `{
+  "model": "claude-3-5-sonnet-20241022",
+  "system": "You are Claudeforce. Follow Salesforce Apex & Data Cloud architectural standards. Always use WITH USER_MODE, bulkified collections, and avoid SOQL inside loops.",
+  "messages": [
+    {
+      "role": "user",
+      "content": "Refactor this legacy before-update trigger into a modern domain-driven handler with Platform Event publishing."
+    }
+  ]
+}`
+    }
+  },
+
+  mcpApis: {
+    id: 'mcpApis',
+    title: 'Dual-Plane MCPs & Modern Salesforce APIs',
+    subtitle: 'The Model Context Protocol Standard for Enterprise AI',
+    tagline: '"Two distinct hosted planes: System of Context vs. System of Action."',
+    icon: '🔌',
+    accentColor: '#ec4899',
+    summary: 'The Model Context Protocol (MCP) is the open standard that connects AI models to external tools and context. Salesforce provides a Dual-Plane hosted MCP architecture to guarantee enterprise security.',
+
+    dualPlanes: [
+      {
+        plane: 'Plane 1: Data 360 MCP Server (data360)',
+        subtitle: 'System of Context',
+        color: '#06b6d4',
+        endpoint: 'https://api.salesforce.com/platform/mcp/v1/data/data360',
+        status: 'General Availability (GA)',
+        tools: [
+          'data360_search: Discover available DMOs, Calculated Insights, and Semantic models.',
+          'data360_payload_examples: Inspect sample query schemas and parameters.',
+          'data360_execute: Run parameterized SQL/GraphQL context queries.'
+        ],
+        security: 'Data space isolation, View/Manage Data 360 permissions, read-only analytics isolation.',
+        whySeparate: 'Keeps massive analytical reads isolated from transactional state-changing mutations.'
+      },
+      {
+        plane: 'Plane 2: Headless 360 MCP Server (platform/headless-360)',
+        subtitle: 'System of Action (Platform Execution Plane)',
+        color: '#db2777',
+        endpoint: 'https://api.salesforce.com/platform/mcp/v1/platform/headless-360',
+        status: 'Beta (v67.0+)',
+        tools: [
+          'headless360_discover: Catalog accessible SObjects, Flows, and Apex actions.',
+          'headless360_describe: Retrieve typed parameter schemas for a target action.',
+          'headless360_dispatch: Execute state-changing actions (insert, update, flow call).',
+          'headless360_dispatch_readonly: Run secure SOQL queries with user mode.'
+        ],
+        security: 'Strictly executes as authenticated user; native FLS, CRUD, and sharing rules enforced. Writes to Setup Audit Trail.',
+        whySeparate: 'Prevents privilege escalation; guarantees that every tool call adheres to the user\'s exact CRM permissions.'
+      }
+    ],
+
+    apiLandscape: [
+      {
+        name: 'GraphQL API',
+        type: 'Query & Mutation',
+        bestFor: 'Single-roundtrip multi-object queries for mobile apps and Headless 360 micro-frontends with zero over-fetching.'
+      },
+      {
+        name: 'REST Composite & Graph',
+        type: 'Transactional Batch',
+        bestFor: 'Executing up to 500 dependent sub-requests atomically with rollback-on-error support.'
+      },
+      {
+        name: 'Pub/Sub API (gRPC)',
+        type: 'Streaming Events',
+        bestFor: 'Bi-directional streaming of Platform Events and Change Data Capture (CDC) over HTTP/2 with high throughput.'
+      },
+      {
+        name: 'Tooling & Metadata API',
+        type: 'DevOps & Administration',
+        bestFor: 'Dynamic inspection of org configuration, custom fields, Apex classes, and CI/CD deployment pipelines.'
+      },
+      {
+        name: 'Bulk API 2.0',
+        type: 'High-Volume Data Loading',
+        bestFor: 'Asynchronous ingestion of millions of records with automated chunking and parallel processing.'
+      }
+    ],
+
+    sampleCode: {
+      title: 'MCP Client Tool Call to Headless 360',
+      lang: 'json',
+      code: `// MCP JSON-RPC 2.0 Tool Call
+{
+  "jsonrpc": "2.0",
+  "method": "tools/call",
+  "params": {
+    "name": "headless360_dispatch",
+    "arguments": {
+      "action": "insert_record",
+      "sObjectType": "INDRA_Care_Case__c",
+      "fields": {
+        "Shipment__c": "a018800000XyZ1A",
+        "Severity__c": "Critical_P0",
+        "Subject": "Autonomous Cold-Chain Reroute"
+      }
+    }
+  },
+  "id": "call-0941"
+}`
+    }
+  },
+
+  semanticMatrix: {
+    id: 'semanticMatrix',
+    title: 'The Metadata & Semantic Layer Matrix',
+    subtitle: 'From Database Tables to Ontological Customer Knowledge',
+    tagline: '"How Salesforce bridges raw relational data, declarative metadata, and AI ontologies."',
+    icon: '🏢',
+    accentColor: '#3b82f6',
+    summary: 'Understanding a Salesforce org requires distinguishing between three evolutionary tiers: the physical database layer, the declarative metadata layer, and the semantic ontologies of Data Cloud.',
+
+    tiers: [
+      {
+        tier: 'Tier 1: Physical Relational Storage',
+        metaphor: 'The Foundation Piles',
+        technology: 'Oracle / PostgreSQL Multi-Tenant Database',
+        content: 'Raw tables with partitioned org IDs, custom field columns (Value0, Value1), and clustered indexes.',
+        visibility: 'Hidden from developers behind the Salesforce abstraction.'
+      },
+      {
+        tier: 'Tier 2: Declarative Metadata Layer',
+        metaphor: 'The Structural Skyscraper Framework',
+        technology: 'SObjects, Custom Fields, Layouts, FLS, Sharing Rules, Apex, Flows',
+        content: 'Declarative XML/JSON metadata representations. Defines what an Account or Shipment is, who can see it, and what happens when it changes.',
+        visibility: 'Admin and Developer domain (Setup, VS Code, SFDX).'
+      },
+      {
+        tier: 'Tier 3: The Semantic Layer (Data Cloud / Ontologies)',
+        metaphor: 'The Smart City Brain & Unified Graph',
+        technology: 'Cloud Information Model (CIM), DLOs, DMOs, Identity Resolution, Vectors',
+        content: 'Business meaning above physical schema. Unifies fragmented identities into a single human, indexes semantic meanings into vector space, and calculates live customer metrics.',
+        visibility: 'Agentforce, Claude, Analytics, and Headless 360 consumers.'
+      }
+    ]
+  }
+};
+
+  
+
+class ParticleSystem {
+  constructor() {
+    this.packets = [];
+    this.drones = [];
+    this.smokePuffs = [];
+    this.waterRipples = [];
+    this.radarAngle = 0;
+    this.pulsePhase = 0;
+
+    this.initDrones();
+  }
+
+  initDrones() {
+    const droneColors = ['#06b6d4', '#f97316', '#ec4899'];
+    const droneNames = ['Kaveri Autonomous SDR Drone', 'Claudeforce Co-Pilot Drone', 'Headless MCP Data Courier'];
+
+    DRONE_PATHS.forEach((path, i) => {
+      this.drones.push({
+        name: droneNames[i] || `Drone-${i + 1}`,
+        path: path,
+        color: droneColors[i] || '#8b5cf6',
+        segmentIndex: 0,
+        progress: Math.random(),
+        speed: 0.006 + Math.random() * 0.003,
+        currentX: path[0].x,
+        currentY: path[0].y,
+        altitude: 40 + i * 15
+      });
+    });
+  }
+
+  spawnPacket(fromBuilding, toBuilding, color = '#38bdf8', speed = 0.015) {
+    if (!fromBuilding || !toBuilding) return;
+    this.packets.push({
+      fromX: fromBuilding.gridX + fromBuilding.width / 2,
+      fromY: fromBuilding.gridY + fromBuilding.height / 2,
+      toX: toBuilding.gridX + toBuilding.width / 2,
+      toY: toBuilding.gridY + toBuilding.height / 2,
+      progress: 0,
+      speed: speed,
+      color: color,
+      size: 4
+    });
+  }
+
+  update(delta = 16) {
+    // Update radar & pulses
+    this.radarAngle = (this.radarAngle + 0.04) % (Math.PI * 2);
+    this.pulsePhase = (this.pulsePhase + 0.05) % (Math.PI * 2);
+
+    // Update data packets
+    for (let i = this.packets.length - 1; i >= 0; i--) {
+      const p = this.packets[i];
+      p.progress += p.speed;
+      if (p.progress >= 1) {
+        this.packets.splice(i, 1);
+      }
+    }
+
+    // Auto-replenish ambient packets if low
+    if (this.packets.length < 8 && Math.random() < 0.06) {
+      this.spawnAmbientPacket();
+    }
+
+    // Update drones
+    this.drones.forEach(d => {
+      d.progress += d.speed;
+      if (d.progress >= 1) {
+        d.progress = 0;
+        d.segmentIndex = (d.segmentIndex + 1) % d.path.length;
+      }
+      const p1 = d.path[d.segmentIndex];
+      const p2 = d.path[(d.segmentIndex + 1) % d.path.length];
+      d.currentX = p1.x + (p2.x - p1.x) * d.progress;
+      d.currentY = p1.y + (p2.y - p1.y) * d.progress;
+    });
+
+    // Update smoke puffs
+    if (Math.random() < 0.08) {
+      // Spawn puff from Custom Objects Works (grid: 2, 7)
+      this.smokePuffs.push({
+        x: 3.0,
+        y: 8.0,
+        heightOffset: 45,
+        radius: 3,
+        alpha: 0.7,
+        vx: (Math.random() - 0.5) * 0.005,
+        vy: -0.01,
+        vz: 0.4
+      });
+    }
+
+    for (let i = this.smokePuffs.length - 1; i >= 0; i--) {
+      const sp = this.smokePuffs[i];
+      sp.x += sp.vx;
+      sp.y += sp.vy;
+      sp.heightOffset += sp.vz;
+      sp.radius += 0.08;
+      sp.alpha -= 0.008;
+      if (sp.alpha <= 0) {
+        this.smokePuffs.splice(i, 1);
+      }
+    }
+  }
+
+  setBuildings(buildings) {
+    this.buildings = buildings;
+  }
+
+  spawnAmbientPacket() {
+    if (!this.buildings || this.buildings.length < 2) return;
+    const b1 = this.buildings[Math.floor(Math.random() * this.buildings.length)];
+    if (b1.relationships && b1.relationships.length > 0) {
+      const targetId = b1.relationships[Math.floor(Math.random() * b1.relationships.length)];
+      const b2 = this.buildings.find(b => b.id === targetId);
+      if (b2) {
+        this.spawnPacket(b1, b2, b1.color || '#38bdf8', 0.012 + Math.random() * 0.008);
+      }
+    }
+  }
+}
+
+  
+
+
+class IsometricCanvas {
+  constructor(canvas, catalog, particleSystem) {
+    this.canvas = canvas;
+    this.ctx = canvas.getContext('2d');
+    this.catalog = catalog;
+    this.particleSystem = particleSystem;
+    this.particleSystem.setBuildings(catalog.buildings);
+
+    this.tileMap = generateTileMap();
+    this.buildings = catalog.buildings;
+    this.conduits = catalog.conduits;
+
+    // Camera state with smooth lerping
+    this.camera = {
+      x: 0,
+      y: 0,
+      targetX: 0,
+      targetY: 0,
+      zoom: 1.0,
+      targetZoom: 1.0,
+      isDragging: false,
+      dragStartX: 0,
+      dragStartY: 0,
+      camStartX: 0,
+      camStartY: 0
+    };
+
+    // View modes: 'rendered' (axonometric model), 'wireframe' (structural blueprint)
+    this.viewMode = 'rendered';
+    this.hoveredBuilding = null;
+    this.selectedBuilding = null;
+    this.activeFilter = 'all';
+    this.showCallouts = true;
+
+    this.initCanvasSize();
+    this.centerCamera(true);
+    this.bindEvents();
+  }
+
+  initCanvasSize() {
+    const dpr = window.devicePixelRatio || 1;
+    const rect = this.canvas.getBoundingClientRect();
+    const w = rect.width > 50 ? rect.width : (window.innerWidth || 1200);
+    const h = rect.height > 50 ? rect.height : (window.innerHeight || 800);
+    this.canvas.width = w * dpr;
+    this.canvas.height = h * dpr;
+    this.ctx.setTransform(1, 0, 0, 1, 0, 0);
+    this.ctx.scale(dpr, dpr);
+    this.width = w;
+    this.height = h;
+  }
+
+  centerCamera(immediate = false) {
+    const centerScreen = this.gridToScreen(13, 13);
+    const targetX = this.width / 2 - centerScreen.x * this.camera.targetZoom;
+    const targetY = this.height / 2 - (centerScreen.y - 100) * this.camera.targetZoom;
+
+    this.camera.targetX = targetX;
+    this.camera.targetY = targetY;
+
+    if (immediate) {
+      this.camera.x = targetX;
+      this.camera.y = targetY;
+      this.camera.zoom = this.camera.targetZoom;
+    }
+  }
+
+  focusBuilding(buildingId) {
+    const b = this.buildings.find(item => item.id === buildingId);
+    if (!b) return;
+    this.selectedBuilding = b;
+    const pos = this.gridToScreen(b.gridX + b.width / 2, b.gridY + b.height / 2);
+    this.camera.targetX = this.width / 2 - pos.x * this.camera.targetZoom;
+    this.camera.targetY = this.height / 2 - (pos.y - b.floors * 1.5) * this.camera.targetZoom;
+    sfx.buildingSelect();
+  }
+
+  gridToScreen(gx, gy) {
+    return {
+      x: (gx - gy) * (TILE_WIDTH / 2),
+      y: (gx + gy) * (TILE_HEIGHT / 2)
+    };
+  }
+
+  screenToGrid(sx, sy) {
+    const worldX = (sx - this.camera.x) / this.camera.zoom;
+    const worldY = (sy - this.camera.y) / this.camera.zoom;
+    const gx = (worldX / (TILE_WIDTH / 2) + worldY / (TILE_HEIGHT / 2)) / 2;
+    const gy = (worldY / (TILE_HEIGHT / 2) - worldX / (TILE_WIDTH / 2)) / 2;
+    return { gx, gy };
+  }
+
+  bindEvents() {
+    window.addEventListener('resize', () => this.initCanvasSize());
+
+    this.canvas.addEventListener('mousedown', (e) => {
+      this.camera.isDragging = true;
+      this.camera.dragStartX = e.clientX;
+      this.camera.dragStartY = e.clientY;
+      this.camera.camStartX = this.camera.x;
+      this.camera.camStartY = this.camera.y;
+    });
+
+    window.addEventListener('mousemove', (e) => {
+      if (this.camera.isDragging) {
+        const dx = e.clientX - this.camera.dragStartX;
+        const dy = e.clientY - this.camera.dragStartY;
+        this.camera.x = this.camera.camStartX + dx;
+        this.camera.y = this.camera.camStartY + dy;
+        this.camera.targetX = this.camera.x;
+        this.camera.targetY = this.camera.y;
+      } else {
+        const rect = this.canvas.getBoundingClientRect();
+        const mx = e.clientX - rect.left;
+        const my = e.clientY - rect.top;
+        this.checkHover(mx, my);
+      }
+    });
+
+    window.addEventListener('mouseup', (e) => {
+      if (this.camera.isDragging) {
+        const dist = Math.hypot(e.clientX - this.camera.dragStartX, e.clientY - this.camera.dragStartY);
+        this.camera.isDragging = false;
+        if (dist < 5) {
+          const rect = this.canvas.getBoundingClientRect();
+          const mx = e.clientX - rect.left;
+          const my = e.clientY - rect.top;
+          this.handleClick(mx, my);
+        }
+      }
+    });
+
+    this.canvas.addEventListener('wheel', (e) => {
+      e.preventDefault();
+      const zoomFactor = e.deltaY < 0 ? 1.14 : 0.88;
+      const newZoom = Math.max(0.4, Math.min(2.5, this.camera.targetZoom * zoomFactor));
+
+      const rect = this.canvas.getBoundingClientRect();
+      const mx = e.clientX - rect.left;
+      const my = e.clientY - rect.top;
+
+      this.camera.targetX = mx - (mx - this.camera.x) * (newZoom / this.camera.zoom);
+      this.camera.targetY = my - (my - this.camera.y) * (newZoom / this.camera.zoom);
+      this.camera.targetZoom = newZoom;
+    }, { passive: false });
+  }
+
+  checkHover(mx, my) {
+    let found = null;
+    const sorted = [...this.buildings].sort((a, b) => {
+      return (b.gridX + b.width + b.gridY + b.height) - (a.gridX + a.width + a.gridY + a.height);
+    });
+
+    for (const b of sorted) {
+      const p = this.gridToScreen(b.gridX + b.width / 2, b.gridY + b.height / 2);
+      const sx = this.camera.x + p.x * this.camera.zoom;
+      const sy = this.camera.y + (p.y - b.floors * 1.5) * this.camera.zoom;
+      const bW = (b.width * TILE_WIDTH) * this.camera.zoom * 0.95;
+      const bH = (b.height * TILE_HEIGHT + b.floors * 3.0) * this.camera.zoom;
+
+      if (mx >= sx - bW / 2 && mx <= sx + bW / 2 && my >= sy - bH * 0.4 && my <= sy + bH * 0.7) {
+        found = b;
+        break;
+      }
+    }
+
+    if (found !== this.hoveredBuilding) {
+      this.hoveredBuilding = found;
+      this.canvas.style.cursor = found ? 'pointer' : 'grab';
+      if (found) sfx.click();
+    }
+  }
+
+  handleClick(mx, my) {
+    if (this.hoveredBuilding) {
+      this.selectedBuilding = this.hoveredBuilding;
+      sfx.buildingSelect();
+      if (this.onBuildingSelected) {
+        this.onBuildingSelected(this.hoveredBuilding);
+      }
+    }
+  }
+
+  update(delta) {
+    this.camera.x += (this.camera.targetX - this.camera.x) * 0.14;
+    this.camera.y += (this.camera.targetY - this.camera.y) * 0.14;
+    this.camera.zoom += (this.camera.targetZoom - this.camera.zoom) * 0.14;
+  }
+
+  render(timestamp = 0) {
+    const ctx = this.ctx;
+    this.update(16);
+
+    // Architectural drafting board background
+    ctx.fillStyle = '#060911';
+    ctx.fillRect(0, 0, this.width, this.height);
+
+    ctx.save();
+    ctx.translate(this.camera.x, this.camera.y);
+    ctx.scale(this.camera.zoom, this.camera.zoom);
+
+    // 1. Architectural Masterplan Ground Grid
+    this.renderMasterplanGrid(ctx, timestamp);
+
+    // 2. Circulation Arterials & Data Conduits
+    this.renderCirculationConduits(ctx, timestamp);
+
+    // 3. Axonometric Architectural Masses (Depth-Sorted)
+    this.renderArchitecturalMasses(ctx, timestamp);
+
+    // 4. Dynamic Data Vectors & Autonomous Drone Particles
+    this.renderParticlesAndDrones(ctx, timestamp);
+
+    // 5. Architectural Callout Annotations with Leader Lines
+    if (this.showCallouts) {
+      this.renderArchitecturalCallouts(ctx, timestamp);
+    }
+
+    ctx.restore();
+
+    // 6. Active Building Floating Spec Badge (Screen-space)
+    if (this.hoveredBuilding) {
+      this.renderHoverSpecBadge(ctx, this.hoveredBuilding);
+    }
+  }
+
+  renderMasterplanGrid(ctx, timestamp) {
+    // Draw subtle isometric ground datum lines
+    for (let y = 0; y < GRID_SIZE; y++) {
+      for (let x = 0; x < GRID_SIZE; x++) {
+        const type = this.tileMap[y][x];
+        const { x: sx, y: sy } = this.gridToScreen(x, y);
+
+        // Viewport culling
+        const screenPx = this.camera.x + sx * this.camera.zoom;
+        const screenPy = this.camera.y + sy * this.camera.zoom;
+        if (screenPx < -120 || screenPx > this.width + 120 || screenPy < -120 || screenPy > this.height + 120) {
+          continue;
+        }
+
+        ctx.save();
+        ctx.translate(sx, sy);
+
+        ctx.beginPath();
+        ctx.moveTo(0, -TILE_HEIGHT / 2);
+        ctx.lineTo(TILE_WIDTH / 2, 0);
+        ctx.lineTo(0, TILE_HEIGHT / 2);
+        ctx.lineTo(-TILE_WIDTH / 2, 0);
+        ctx.closePath();
+
+        if (type === 3) {
+          // Data Lake Reservoir (Semantic Harbor)
+          const wave = Math.sin(timestamp * 0.0025 + (x + y) * 0.5) * 6;
+          ctx.fillStyle = `rgba(6, 182, 212, ${0.12 + wave * 0.005})`;
+          ctx.fill();
+          ctx.strokeStyle = 'rgba(6, 182, 212, 0.4)';
+          ctx.lineWidth = 0.75;
+          ctx.stroke();
+
+          // Delicate contour hatching
+          if ((x + y) % 2 === 0) {
+            ctx.beginPath();
+            ctx.moveTo(-12, 0);
+            ctx.lineTo(12, 0);
+            ctx.strokeStyle = 'rgba(6, 182, 212, 0.2)';
+            ctx.lineWidth = 0.5;
+            ctx.stroke();
+          }
+        } else if (type === 1 || type === 2) {
+          // Primary Circulation Highway
+          ctx.fillStyle = type === 2 ? 'rgba(15, 23, 42, 0.95)' : 'rgba(10, 16, 30, 0.8)';
+          ctx.fill();
+          ctx.strokeStyle = type === 2 ? 'rgba(56, 189, 248, 0.5)' : 'rgba(255, 255, 255, 0.1)';
+          ctx.lineWidth = type === 2 ? 1.2 : 0.6;
+          ctx.stroke();
+
+          if (type === 2) {
+            // Centerline dashed datum line
+            ctx.beginPath();
+            ctx.moveTo(-10, 0);
+            ctx.lineTo(10, 0);
+            ctx.strokeStyle = 'rgba(56, 189, 248, 0.7)';
+            ctx.lineWidth = 1;
+            ctx.stroke();
+          }
+        } else if (type === 5) {
+          // Central Agentforce Forum / Tech Plaza
+          ctx.fillStyle = 'rgba(99, 102, 241, 0.12)';
+          ctx.fill();
+          ctx.strokeStyle = 'rgba(168, 85, 247, 0.45)';
+          ctx.lineWidth = 0.8;
+          ctx.stroke();
+        } else if (type === 6) {
+          // Maglev Transit Corridor
+          ctx.fillStyle = 'rgba(236, 72, 153, 0.1)';
+          ctx.fill();
+          ctx.strokeStyle = 'rgba(236, 72, 153, 0.5)';
+          ctx.lineWidth = 1;
+          ctx.stroke();
+        } else {
+          // Standard Urban Datum Lot
+          ctx.fillStyle = 'rgba(12, 18, 32, 0.4)';
+          ctx.fill();
+          ctx.strokeStyle = 'rgba(255, 255, 255, 0.035)';
+          ctx.lineWidth = 0.5;
+          ctx.stroke();
+        }
+
+        ctx.restore();
+      }
+    }
+  }
+
+  renderCirculationConduits(ctx, timestamp) {
+    ctx.save();
+    this.conduits.forEach(conduit => {
+      const b1 = this.buildings.find(b => b.id === conduit.from);
+      const b2 = this.buildings.find(b => b.id === conduit.to);
+      if (!b1 || !b2) return;
+
+      const p1 = this.gridToScreen(b1.gridX + b1.width / 2, b1.gridY + b1.height / 2);
+      const p2 = this.gridToScreen(b2.gridX + b2.width / 2, b2.gridY + b2.height / 2);
+
+      let strokeColor = 'rgba(56, 189, 248, 0.4)';
+      if (conduit.type === 'automation') strokeColor = 'rgba(245, 158, 11, 0.5)';
+      if (conduit.type === 'semantic') strokeColor = 'rgba(6, 182, 212, 0.5)';
+      if (conduit.type === 'agentforce') strokeColor = 'rgba(168, 85, 247, 0.55)';
+      if (conduit.type === 'claudeforce') strokeColor = 'rgba(249, 115, 22, 0.55)';
+      if (conduit.type === 'mcp') strokeColor = 'rgba(236, 72, 153, 0.55)';
+      if (conduit.type === 'headless') strokeColor = 'rgba(16, 185, 129, 0.55)';
+
+      if (this.activeFilter !== 'all' && this.activeFilter !== conduit.type) {
+        strokeColor = 'rgba(255, 255, 255, 0.04)';
+      }
+
+      // Architectural Schematic Line with Arrow Terminals
+      ctx.beginPath();
+      ctx.moveTo(p1.x, p1.y);
+      ctx.lineTo(p2.x, p2.y);
+      ctx.strokeStyle = strokeColor;
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+
+      // Traveling discrete datum packets
+      ctx.setLineDash([4, 14]);
+      ctx.lineDashOffset = -timestamp * 0.035;
+      ctx.strokeStyle = '#ffffff';
+      ctx.lineWidth = 2;
+      ctx.stroke();
+      ctx.setLineDash([]);
+    });
+    ctx.restore();
+  }
+
+  renderArchitecturalMasses(ctx, timestamp) {
+    const sorted = [...this.buildings].sort((a, b) => {
+      const depthA = (a.gridX + a.width) + (a.gridY + a.height);
+      const depthB = (b.gridX + b.width) + (b.gridY + b.height);
+      return depthA - depthB;
+    });
+
+    sorted.forEach(b => {
+      this.renderSingleAxonometricBuilding(ctx, b, timestamp);
+    });
+  }
+
+  renderSingleAxonometricBuilding(ctx, b, timestamp) {
+    const { x: sx, y: sy } = this.gridToScreen(b.gridX, b.gridY);
+    const widthPx = b.width * (TILE_WIDTH / 2);
+    const heightPx = b.height * (TILE_HEIGHT / 2);
+    const massHeight = b.floors * 3.2;
+
+    const isHovered = this.hoveredBuilding && this.hoveredBuilding.id === b.id;
+    const isSelected = this.selectedBuilding && this.selectedBuilding.id === b.id;
+    const isDimmed = this.activeFilter !== 'all' && this.activeFilter !== b.districtId;
+
+    ctx.save();
+    ctx.translate(sx, sy);
+
+    if (isDimmed) {
+      ctx.globalAlpha = 0.18;
+    }
+
+    // 1. Precise Axonometric Drop Shadow (Architectural Hatching)
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.55)';
+    ctx.beginPath();
+    ctx.moveTo(0, heightPx * 0.5);
+    ctx.lineTo(widthPx * 1.6, heightPx * 1.8);
+    ctx.lineTo(widthPx * 0.8, heightPx * 2.3);
+    ctx.lineTo(-widthPx * 0.3, heightPx * 1.2);
+    ctx.closePath();
+    ctx.fill();
+
+    // 2. Concrete Structural Plinth (Base Podium)
+    ctx.fillStyle = '#0a0f1d';
+    ctx.beginPath();
+    ctx.moveTo(0, 0);
+    ctx.lineTo(-widthPx, heightPx);
+    ctx.lineTo(0, heightPx * 2);
+    ctx.lineTo(widthPx, heightPx);
+    ctx.closePath();
+    ctx.fill();
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.18)';
+    ctx.lineWidth = 1;
+    ctx.stroke();
+
+    // 3. Facade Tones & Architectural Glazing
+    const baseAccent = b.color || '#38bdf8';
+    const leftFacade = 'rgba(16, 24, 42, 0.95)';
+    const rightFacade = 'rgba(10, 15, 28, 0.98)';
+    const roofSlab = 'rgba(26, 38, 64, 0.92)';
+
+    // Left Elevation Face
+    ctx.beginPath();
+    ctx.moveTo(0, 0);
+    ctx.lineTo(-widthPx, heightPx);
+    ctx.lineTo(-widthPx, heightPx - massHeight);
+    ctx.lineTo(0, -massHeight);
+    ctx.closePath();
+    ctx.fillStyle = leftFacade;
+    ctx.fill();
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.12)';
+    ctx.lineWidth = 1;
+    ctx.stroke();
+
+    // Right Elevation Face
+    ctx.beginPath();
+    ctx.moveTo(0, 0);
+    ctx.lineTo(widthPx, heightPx);
+    ctx.lineTo(widthPx, heightPx - massHeight);
+    ctx.lineTo(0, -massHeight);
+    ctx.closePath();
+    ctx.fillStyle = rightFacade;
+    ctx.fill();
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.15)';
+    ctx.lineWidth = 1;
+    ctx.stroke();
+
+    // 4. Architectural Floor Slabs & Vertical Mullions
+    this.renderFloorPlatesAndMullions(ctx, b, widthPx, heightPx, massHeight, baseAccent, timestamp);
+
+    // 5. Roof Floor Slab (Horizontal Datum)
+    ctx.beginPath();
+    ctx.moveTo(0, -massHeight);
+    ctx.lineTo(-widthPx, heightPx - massHeight);
+    ctx.lineTo(0, heightPx * 2 - massHeight);
+    ctx.lineTo(widthPx, heightPx - massHeight);
+    ctx.closePath();
+    ctx.fillStyle = roofSlab;
+    ctx.fill();
+    ctx.strokeStyle = baseAccent;
+    ctx.lineWidth = 1.5;
+    ctx.stroke();
+
+    // 6. Inset Penthouse / Mechanical Crown Assembly
+    const crownW = widthPx * 0.65;
+    const crownH = heightPx * 0.65;
+    const crownLift = massHeight + 12;
+
+    ctx.beginPath();
+    ctx.moveTo(0, -crownLift);
+    ctx.lineTo(-crownW, crownH - crownLift);
+    ctx.lineTo(0, crownH * 2 - crownLift);
+    ctx.lineTo(crownW, crownH - crownLift);
+    ctx.closePath();
+    ctx.fillStyle = baseAccent;
+    ctx.fill();
+    ctx.strokeStyle = '#ffffff';
+    ctx.lineWidth = 1.2;
+    ctx.stroke();
+
+    // 7. Rooftop Architectural Focal Element
+    this.renderArchitecturalCrown(ctx, b, widthPx, heightPx, crownLift, timestamp);
+
+    // 8. Architectural Hover / Active Selection Boundary
+    if (isHovered || isSelected) {
+      // Crisp neon wireframe bounding contour
+      ctx.lineWidth = isSelected ? 2.5 : 1.75;
+      ctx.strokeStyle = isSelected ? '#facc15' : varAccent(b.districtId);
+      ctx.stroke();
+
+      // Footprint datum frame
+      ctx.beginPath();
+      ctx.moveTo(0, -2);
+      ctx.lineTo(-widthPx - 4, heightPx);
+      ctx.lineTo(0, heightPx * 2 + 4);
+      ctx.lineTo(widthPx + 4, heightPx);
+      ctx.closePath();
+      ctx.strokeStyle = isSelected ? '#facc15' : 'rgba(0, 240, 255, 0.8)';
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+    }
+
+    ctx.restore();
+  }
+
+  renderFloorPlatesAndMullions(ctx, b, w, h, bh, accent, timestamp) {
+    const floorLevels = Math.min(12, Math.floor(b.floors / 3.8));
+    const bays = 3;
+
+    // Horizontal Floor Slab Linework
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.08)';
+    ctx.lineWidth = 0.75;
+
+    for (let f = 1; f <= floorLevels; f++) {
+      const yL = (bh / (floorLevels + 1)) * f;
+
+      // Left face floor slab
+      ctx.beginPath();
+      ctx.moveTo(0, -yL);
+      ctx.lineTo(-w, h - yL);
+      ctx.stroke();
+
+      // Right face floor slab
+      ctx.beginPath();
+      ctx.moveTo(0, -yL);
+      ctx.lineTo(w, h - yL);
+      ctx.stroke();
+
+      // Subtle architectural interior office glow
+      for (let c = 1; c <= bays; c++) {
+        const isLit = Math.sin(timestamp * 0.0012 + f * 7 + c * 3 + b.floors) > -0.15;
+        if (isLit) {
+          ctx.fillStyle = 'rgba(255, 255, 255, 0.75)';
+          const wx = -w * (c / (bays + 1));
+          const wy = h * (c / (bays + 1)) - yL;
+          ctx.fillRect(wx - 2, wy - 3, 3, 5);
+
+          const rx = w * (c / (bays + 1));
+          const ry = h * (c / (bays + 1)) - yL;
+          ctx.fillStyle = accent;
+          ctx.fillRect(rx - 1, ry - 3, 3, 5);
+        }
+      }
+    }
+
+    // Vertical Mullion Columns
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.05)';
+    ctx.lineWidth = 0.5;
+    for (let c = 1; c <= bays; c++) {
+      const ratio = c / (bays + 1);
+      ctx.beginPath();
+      ctx.moveTo(-w * ratio, h * ratio);
+      ctx.lineTo(-w * ratio, h * ratio - bh);
+      ctx.stroke();
+
+      ctx.beginPath();
+      ctx.moveTo(w * ratio, h * ratio);
+      ctx.lineTo(w * ratio, h * ratio - bh);
+      ctx.stroke();
+    }
+  }
+
+  renderArchitecturalCrown(ctx, b, w, h, lift, timestamp) {
+    const cx = 0;
+    const cy = h * 0.65 - lift;
+
+    if (b.roofType === 'pulsing_orb') {
+      // Agentforce Atlas Spire: Suspended Polyhedral Energy Core
+      const pulse = Math.sin(timestamp * 0.004) * 6;
+      const gradient = ctx.createRadialGradient(cx, cy - 26, 2, cx, cy - 26, 26 + pulse);
+      gradient.addColorStop(0, '#ffffff');
+      gradient.addColorStop(0.35, '#c084fc');
+      gradient.addColorStop(0.7, 'rgba(168, 85, 247, 0.35)');
+      gradient.addColorStop(1, 'transparent');
+
+      ctx.fillStyle = gradient;
+      ctx.beginPath();
+      ctx.arc(cx, cy - 26, 26 + pulse, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Octahedral Core
+      ctx.fillStyle = '#9333ea';
+      ctx.beginPath();
+      ctx.moveTo(cx, cy - 36);
+      ctx.lineTo(cx + 8, cy - 26);
+      ctx.lineTo(cx, cy - 16);
+      ctx.lineTo(cx - 8, cy - 26);
+      ctx.closePath();
+      ctx.fill();
+      ctx.strokeStyle = '#f3e8ff';
+      ctx.lineWidth = 1.2;
+      ctx.stroke();
+
+      // Gyroscopic Orbital Gimbal Rings
+      ctx.beginPath();
+      ctx.ellipse(cx, cy - 26, 20, 8, timestamp * 0.002, 0, Math.PI * 2);
+      ctx.strokeStyle = 'rgba(0, 240, 255, 0.7)';
+      ctx.lineWidth = 1.2;
+      ctx.stroke();
+    } else if (b.roofType === 'beacon') {
+      // Calculated Insights Lighthouse: Dynamic 3D Axonometric Light Cone
+      const angle = timestamp * 0.0028;
+      ctx.fillStyle = '#06b6d4';
+      ctx.beginPath();
+      ctx.arc(cx, cy - 14, 7, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.save();
+      ctx.beginPath();
+      ctx.moveTo(cx, cy - 14);
+      ctx.arc(cx, cy - 14, 160, angle - 0.25, angle + 0.25);
+      ctx.closePath();
+      ctx.fillStyle = 'rgba(6, 182, 212, 0.18)';
+      ctx.fill();
+      ctx.restore();
+    } else if (b.roofType === 'rotating_dome' || b.roofType === 'radar') {
+      // Claudeforce Geodesic Observatory Dome
+      ctx.beginPath();
+      ctx.arc(cx, cy - 10, 11, 0, Math.PI, true);
+      ctx.fillStyle = '#1e293b';
+      ctx.fill();
+      ctx.strokeStyle = '#f97316';
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+
+      // Radar Azimuth Pointer
+      const angle = timestamp * 0.035;
+      ctx.beginPath();
+      ctx.moveTo(cx, cy - 10);
+      ctx.lineTo(cx + Math.cos(angle) * 18, cy - 10 + Math.sin(angle) * 9);
+      ctx.strokeStyle = '#ffffff';
+      ctx.lineWidth = 2;
+      ctx.stroke();
+    } else if (b.roofType === 'antenna') {
+      // Structural Communications Mast with Ruby Strobe
+      ctx.beginPath();
+      ctx.moveTo(cx, cy);
+      ctx.lineTo(cx, cy - 36);
+      ctx.strokeStyle = '#94a3b8';
+      ctx.lineWidth = 1.8;
+      ctx.stroke();
+
+      const strobe = Math.sin(timestamp * 0.007) > 0.3;
+      ctx.fillStyle = strobe ? '#ff453a' : '#450a0a';
+      ctx.beginPath();
+      ctx.arc(cx, cy - 36, 3.5, 0, Math.PI * 2);
+      ctx.fill();
+      if (strobe) {
+        ctx.strokeStyle = 'rgba(255, 69, 58, 0.6)';
+        ctx.stroke();
+      }
+    } else if (b.roofType === 'helipad') {
+      // Headless Skyport Cantilevered Aerospace Deck
+      ctx.fillStyle = '#064e3b';
+      ctx.beginPath();
+      ctx.arc(cx, cy, 15, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.strokeStyle = '#10b981';
+      ctx.lineWidth = 2;
+      ctx.stroke();
+
+      ctx.fillStyle = '#ffffff';
+      ctx.font = '700 11px JetBrains Mono, monospace';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('HXL', cx, cy);
+    } else if (b.roofType === 'crystal') {
+      // Vector RAG Knowledge Monolith
+      const bob = Math.sin(timestamp * 0.004) * 5;
+      ctx.fillStyle = '#22d3ee';
+      ctx.beginPath();
+      ctx.moveTo(cx, cy - 30 + bob);
+      ctx.lineTo(cx + 8, cy - 16 + bob);
+      ctx.lineTo(cx, cy - 2 + bob);
+      ctx.lineTo(cx - 8, cy - 16 + bob);
+      ctx.closePath();
+      ctx.fill();
+      ctx.strokeStyle = '#ffffff';
+      ctx.lineWidth = 1.2;
+      ctx.stroke();
+    }
+  }
+
+  renderParticlesAndDrones(ctx, timestamp) {
+    // 1. Ingestion / Action Data Packets
+    this.particleSystem.packets.forEach(p => {
+      const curX = p.fromX + (p.toX - p.fromX) * p.progress;
+      const curY = p.fromY + (p.toY - p.fromY) * p.progress;
+      const pos = this.gridToScreen(curX, curY);
+      const arc = Math.sin(p.progress * Math.PI) * 28;
+
+      ctx.save();
+      ctx.fillStyle = p.color;
+      ctx.shadowColor = p.color;
+      ctx.shadowBlur = 12;
+      ctx.beginPath();
+      ctx.arc(pos.x, pos.y - arc, p.size || 4.5, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+    });
+
+    // 2. Autonomous Coworker Drones (Spatial Waypoint Flight)
+    this.particleSystem.drones.forEach((d, i) => {
+      const pos = this.gridToScreen(d.currentX, d.currentY);
+      const bob = Math.sin(timestamp * 0.005 + i) * 3;
+      const altitudeY = pos.y - d.altitude + bob;
+
+      ctx.save();
+      // Drop Shadow
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.4)';
+      ctx.beginPath();
+      ctx.ellipse(pos.x, pos.y, 8, 4, 0, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Drone Chassis
+      ctx.fillStyle = d.color;
+      ctx.fillRect(pos.x - 5, altitudeY - 3, 10, 5);
+      ctx.strokeStyle = '#ffffff';
+      ctx.lineWidth = 0.8;
+      ctx.strokeRect(pos.x - 5, altitudeY - 3, 10, 5);
+
+      // Rotors
+      const angle = timestamp * 0.07;
+      ctx.strokeStyle = '#ffffff';
+      ctx.lineWidth = 1.2;
+      ctx.beginPath();
+      ctx.moveTo(pos.x - 10 + Math.cos(angle) * 5, altitudeY - 5);
+      ctx.lineTo(pos.x - 10 - Math.cos(angle) * 5, altitudeY - 5);
+      ctx.moveTo(pos.x + 10 + Math.cos(angle) * 5, altitudeY - 5);
+      ctx.lineTo(pos.x + 10 - Math.cos(angle) * 5, altitudeY - 5);
+      ctx.stroke();
+
+      ctx.restore();
+    });
+  }
+
+  renderArchitecturalCallouts(ctx, timestamp) {
+    // Elegant architectural leader-line callouts anchored to signature landmarks
+    const landmarks = [
+      { id: 'b_standard_objects', label: 'METADATA SCHEMA CITADEL', sub: 'Standard & Custom SObjects', color: '#38bdf8', dir: -1 },
+      { id: 'b_agentforce_core', label: 'ATLAS REASONING ENGINE', sub: 'Autonomous Cognitive Spire', color: '#a855f7', dir: 1 },
+      { id: 'b_data_lake', label: 'DATA CLOUD RESERVOIR', sub: 'Unified Context Graph (DLO/DMO)', color: '#06b6d4', dir: 1 },
+      { id: 'b_headless_gateway', label: 'HEADLESS 360 SKYPORT', sub: 'The API is the UI // HXL', color: '#10b981', dir: -1 },
+      { id: 'b_mcp_context', label: 'DUAL-PLANE MCP TERMINAL', sub: 'Model Context Protocol Hub', color: '#ec4899', dir: 1 }
+    ];
+
+    ctx.save();
+    landmarks.forEach(lm => {
+      const b = this.buildings.find(item => item.id === lm.id);
+      if (!b) return;
+
+      const pos = this.gridToScreen(b.gridX + b.width / 2, b.gridY + b.height / 2);
+      const anchorY = pos.y - b.floors * 3.2 - 25;
+      const offsetLength = 40 * lm.dir;
+      const labelX = pos.x + offsetLength;
+      const labelY = anchorY - 30;
+
+      // Leader line with node circle
+      ctx.beginPath();
+      ctx.arc(pos.x, anchorY, 2.5, 0, Math.PI * 2);
+      ctx.fillStyle = lm.color;
+      ctx.fill();
+
+      ctx.beginPath();
+      ctx.moveTo(pos.x, anchorY);
+      ctx.lineTo(pos.x + offsetLength * 0.4, labelY);
+      ctx.lineTo(labelX, labelY);
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.35)';
+      ctx.lineWidth = 1;
+      ctx.stroke();
+
+      // Typographic callout text
+      ctx.font = '700 9px JetBrains Mono, monospace';
+      ctx.fillStyle = lm.color;
+      ctx.textAlign = lm.dir > 0 ? 'left' : 'right';
+      ctx.fillText(lm.label, labelX + (lm.dir > 0 ? 6 : -6), labelY - 3);
+
+      ctx.font = '500 8.5px Plus Jakarta Sans, sans-serif';
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
+      ctx.fillText(lm.sub, labelX + (lm.dir > 0 ? 6 : -6), labelY + 9);
+    });
+    ctx.restore();
+  }
+
+  renderHoverSpecBadge(ctx, b) {
+    const pos = this.gridToScreen(b.gridX + b.width / 2, b.gridY + b.height / 2);
+    const sx = this.camera.x + pos.x * this.camera.zoom;
+    const sy = this.camera.y + (pos.y - b.floors * 3.2 - 35) * this.camera.zoom;
+
+    ctx.save();
+    ctx.font = '600 12px Plus Jakarta Sans, sans-serif';
+    const textWidth = ctx.measureText(b.name).width;
+
+    const padX = 14;
+    const padY = 8;
+    const w = textWidth + padX * 2;
+    const h = 32;
+
+    ctx.fillStyle = 'rgba(10, 15, 26, 0.94)';
+    ctx.strokeStyle = b.color || '#38bdf8';
+    ctx.lineWidth = 1.5;
+
+    ctx.beginPath();
+    ctx.roundRect(sx - w / 2, sy - h / 2, w, h, 6);
+    ctx.fill();
+    ctx.stroke();
+
+    ctx.fillStyle = '#ffffff';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(b.name, sx, sy);
+    ctx.restore();
+  }
+}
+
+function varAccent(districtId) {
+  if (districtId === 'metadata') return '#38bdf8';
+  if (districtId === 'automation') return '#f59e0b';
+  if (districtId === 'semantic') return '#06b6d4';
+  if (districtId === 'headless') return '#10b981';
+  if (districtId === 'agentforce') return '#a855f7';
+  if (districtId === 'claudeforce') return '#f97316';
+  if (districtId === 'mcp') return '#ec4899';
+  return '#ffffff';
+}
+
+  
+
+class BuildingInspector {
+  constructor(container, onActionTriggered) {
+    this.container = container;
+    this.onActionTriggered = onActionTriggered;
+    this.currentBuilding = null;
+    this.activeTab = 'overview';
+  }
+
+  show(building) {
+    this.currentBuilding = building;
+    this.container.classList.remove('hidden');
+    this.render();
+    sfx.buildingSelect();
+  }
+
+  hide() {
+    this.container.classList.add('hidden');
+    this.currentBuilding = null;
+    sfx.closeModal();
+  }
+
+  setTab(tab) {
+    this.activeTab = tab;
+    sfx.click();
+    this.render();
+  }
+
+  render() {
+    if (!this.currentBuilding) return;
+    const b = this.currentBuilding;
+
+    this.container.innerHTML = `
+      <div class="flex flex-col h-full text-slate-200">
+        <!-- Architectural Header -->
+        <div style="padding: 16px 20px; border-bottom: 1px solid rgba(255, 255, 255, 0.08); background: rgba(8, 12, 22, 0.85); display: flex; align-items: flex-start; justify-content: space-between;">
+          <div style="display: flex; align-items: center; gap: 14px;">
+            <div style="width: 40px; height: 40px; border-radius: 8px; background: ${b.color}18; border: 1px solid ${b.color}; display: flex; align-items: center; justify-content: center; font-size: 18px; font-weight: 700; color: ${b.color}; box-shadow: 0 0 16px ${b.color}33;">
+              ${b.districtId.substring(0, 2).toUpperCase()}
+            </div>
+            <div>
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <h2 style="margin: 0; font-size: 15px; font-weight: 700; color: #ffffff; letter-spacing: -0.01em;">${b.name}</h2>
+              </div>
+              <p style="margin: 2px 0 0; font-size: 11px; color: #94a3b8; font-family: 'JetBrains Mono', monospace;">${b.subtitle}</p>
+            </div>
+          </div>
+          <button id="btn-close-inspector" class="action-btn-ghost" style="padding: 4px 8px; font-size: 12px;">
+            ✕
+          </button>
+        </div>
+
+        <!-- Architectural Dimension Strips -->
+        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; padding: 12px 18px; background: rgba(5, 8, 16, 0.7); border-bottom: 1px solid rgba(255, 255, 255, 0.06); text-align: center;">
+          <div class="arch-card" style="padding: 8px;">
+            <div style="font-size: 10px; color: #64748b; font-family: 'JetBrains Mono', monospace; text-transform: uppercase;">Elevation</div>
+            <div style="font-size: 12px; font-weight: 700; color: #38bdf8; font-family: 'JetBrains Mono', monospace;">EL +${b.floors * 3}m</div>
+          </div>
+          <div class="arch-card" style="padding: 8px;">
+            <div style="font-size: 10px; color: #64748b; font-family: 'JetBrains Mono', monospace; text-transform: uppercase;">Grid Datum</div>
+            <div style="font-size: 12px; font-weight: 700; color: #10b981; font-family: 'JetBrains Mono', monospace;">[${b.gridX}, ${b.gridY}]</div>
+          </div>
+          <div class="arch-card" style="padding: 8px;">
+            <div style="font-size: 10px; color: #64748b; font-family: 'JetBrains Mono', monospace; text-transform: uppercase;">Topology</div>
+            <div style="font-size: 12px; font-weight: 700; color: #a855f7; font-family: 'JetBrains Mono', monospace;">${b.relationships ? b.relationships.length : 0} Ports</div>
+          </div>
+        </div>
+
+        <!-- Tab Selector -->
+        <div style="display: flex; border-bottom: 1px solid rgba(255, 255, 255, 0.08); background: rgba(8, 12, 22, 0.5);">
+          <button id="tab-overview" class="program-btn ${this.activeTab === 'overview' ? 'active' : ''}" style="flex: 1; border-radius: 0; padding: 10px; font-size: 12px;">
+            Architectural Role
+          </button>
+          <button id="tab-schema" class="program-btn ${this.activeTab === 'schema' ? 'active' : ''}" style="flex: 1; border-radius: 0; padding: 10px; font-size: 12px;">
+            Schema & Contract
+          </button>
+          <button id="tab-action" class="program-btn ${this.activeTab === 'action' ? 'active' : ''}" style="flex: 1; border-radius: 0; padding: 10px; font-size: 12px;">
+            Circulation Test
+          </button>
+        </div>
+
+        <!-- Body Content -->
+        <div style="flex: 1; overflow-y: auto; padding: 18px; display: flex; flex-direction: column; gap: 16px; font-size: 12.5px; line-height: 1.6;">
+          ${this.renderBodyContent(b)}
+        </div>
+      </div>
+    `;
+
+    this.container.querySelector('#btn-close-inspector').onclick = () => this.hide();
+    this.container.querySelector('#tab-overview').onclick = () => this.setTab('overview');
+    this.container.querySelector('#tab-schema').onclick = () => this.setTab('schema');
+    this.container.querySelector('#tab-action').onclick = () => this.setTab('action');
+
+    const triggerBtn = this.container.querySelector('#btn-trigger-action');
+    if (triggerBtn) {
+      triggerBtn.onclick = () => {
+        if (this.onActionTriggered) {
+          this.onActionTriggered(b);
+        }
+      };
+    }
+  }
+
+  renderBodyContent(b) {
+    if (this.activeTab === 'overview') {
+      return `
+        <div>
+          <div style="font-size: 11px; color: #64748b; font-family: 'JetBrains Mono', monospace; text-transform: uppercase; margin-bottom: 4px;">Structural Function</div>
+          <p style="margin: 0; color: #f1f5f9; font-weight: 500;">${b.summary}</p>
+        </div>
+
+        <div class="arch-card" style="padding: 12px;">
+          <div style="font-size: 10.5px; font-weight: 700; color: #38bdf8; text-transform: uppercase; margin-bottom: 4px;">Ecosystem Integration</div>
+          <p style="margin: 0; color: #94a3b8; font-size: 11.5px;">${b.explanation}</p>
+        </div>
+
+        <div>
+          <div style="font-size: 11px; color: #64748b; font-family: 'JetBrains Mono', monospace; text-transform: uppercase; margin-bottom: 8px;">Architectural Classifications</div>
+          <div style="display: flex; flex-wrap: wrap; gap: 6px;">
+            ${b.tags.map(t => `<span class="datum-tag">${t}</span>`).join('')}
+          </div>
+        </div>
+
+        ${b.metrics ? `
+          <div>
+            <div style="font-size: 11px; color: #64748b; font-family: 'JetBrains Mono', monospace; text-transform: uppercase; margin-bottom: 8px;">Telemetry Specifications</div>
+            <div class="arch-card" style="padding: 10px; display: flex; flex-direction: column; gap: 6px;">
+              ${Object.entries(b.metrics).map(([k, v]) => `
+                <div style="display: flex; justify-content: space-between; font-size: 11.5px;">
+                  <span style="color: #94a3b8;">${k}</span>
+                  <span style="color: #10b981; font-weight: 600; font-family: 'JetBrains Mono', monospace;">${v}</span>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+        ` : ''}
+      `;
+    } else if (this.activeTab === 'schema') {
+      return `
+        <div>
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+            <span style="font-size: 11px; color: #64748b; font-family: 'JetBrains Mono', monospace; text-transform: uppercase;">Metadata Schema</span>
+            <span class="datum-tag" style="color: #38bdf8;">XML / APEX / SOQL</span>
+          </div>
+          <pre><code>${escapeHtml(b.schemaSnippet || '// No schema definition')}</code></pre>
+        </div>
+      `;
+    } else {
+      return `
+        <div style="display: flex; flex-direction: column; gap: 12px;">
+          <div>
+            <div style="font-size: 11px; color: #64748b; font-family: 'JetBrains Mono', monospace; text-transform: uppercase; margin-bottom: 4px;">Circulation Simulation</div>
+            <p style="margin: 0; color: #94a3b8; font-size: 11.5px;">
+              Dispatch an operational data packet from <strong style="color: #38bdf8;">${b.name}</strong> along connected conduits to trigger downstream automation and cognitive reasoning.
+            </p>
+          </div>
+
+          <button id="btn-trigger-action" class="action-btn-primary" style="justify-content: center; width: 100%; padding: 10px 16px;">
+            ⚡ Broadcast Circulation Packet
+          </button>
+
+          <div id="action-console-log" style="padding: 12px; background: #050811; border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 8px; font-family: 'JetBrains Mono', monospace; font-size: 11px; min-height: 140px; display: flex; flex-direction: column; gap: 6px;">
+            <div style="color: #64748b;">// Ready to dispatch packet...</div>
+          </div>
+        </div>
+      `;
+    }
+  }
+}
+
+function escapeHtml(str) {
+  return str
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+
+  
+
+
+class ConceptModal {
+  constructor(container) {
+    this.container = container;
+    this.activeTopic = 'headless360';
+    this.activeMcpPlane = 'plane1';
+    this.rescueSimStep = 0;
+  }
+
+  show(topicId = 'headless360') {
+    this.activeTopic = topicId;
+    this.container.classList.remove('hidden');
+    this.render();
+    sfx.openModal();
+  }
+
+  hide() {
+    this.container.classList.add('hidden');
+    sfx.closeModal();
+  }
+
+  setTopic(topicId) {
+    this.activeTopic = topicId;
+    sfx.click();
+    this.render();
+  }
+
+  render() {
+    const guide = CONCEPT_GUIDES[this.activeTopic];
+    if (!guide) return;
+
+    this.container.innerHTML = `
+      <div class="modal-overlay">
+        <div class="modal-window">
+          
+          <!-- Top Architectural Title Bar -->
+          <div style="padding: 16px 24px; border-bottom: 1px solid rgba(255, 255, 255, 0.08); background: rgba(8, 12, 22, 0.95); display: flex; align-items: center; justify-content: space-between;">
+            <div style="display: flex; align-items: center; gap: 14px;">
+              <div style="width: 38px; height: 38px; border-radius: 8px; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.15); display: flex; align-items: center; justify-content: center; font-size: 20px;">
+                ${guide.icon}
+              </div>
+              <div>
+                <div style="display: flex; align-items: center; gap: 10px;">
+                  <h1 style="margin: 0; font-size: 16px; font-weight: 700; color: #ffffff; letter-spacing: -0.01em;">${guide.title}</h1>
+                  <span class="datum-tag">ARCH-SPEC 2026</span>
+                </div>
+                <p style="margin: 2px 0 0; font-size: 12px; color: #94a3b8; font-family: 'JetBrains Mono', monospace;">${guide.subtitle}</p>
+              </div>
+            </div>
+            <button id="btn-close-modal" class="action-btn-ghost" style="padding: 6px 12px;">
+              ✕ Close Studio
+            </button>
+          </div>
+
+          <!-- Studio Navigation Tabs -->
+          <div style="display: flex; gap: 4px; padding: 10px 24px; background: rgba(5, 8, 16, 0.7); border-bottom: 1px solid rgba(255, 255, 255, 0.06); overflow-x: auto;">
+            <button data-topic="headless360" class="tab-btn program-btn ${this.activeTopic === 'headless360' ? 'active' : ''}">
+              🚀 Headless 360 Architecture
+            </button>
+            <button data-topic="agentforce" class="tab-btn program-btn ${this.activeTopic === 'agentforce' ? 'active' : ''}">
+              🤖 Agentforce Atlas Engine
+            </button>
+            <button data-topic="claudeforce" class="tab-btn program-btn ${this.activeTopic === 'claudeforce' ? 'active' : ''}">
+              🧠 Claudeforce Intelligence
+            </button>
+            <button data-topic="mcpApis" class="tab-btn program-btn ${this.activeTopic === 'mcpApis' ? 'active' : ''}">
+              🔌 Dual-Plane MCPs & APIs
+            </button>
+            <button data-topic="semanticMatrix" class="tab-btn program-btn ${this.activeTopic === 'semanticMatrix' ? 'active' : ''}">
+              🏢 Semantic Layer Matrix
+            </button>
+          </div>
+
+          <!-- Studio Main Viewport -->
+          <div style="flex: 1; overflow-y: auto; padding: 24px; display: flex; flex-direction: column; gap: 24px; font-size: 13px; line-height: 1.6; color: #cbd5e1;">
+            <!-- Architectural Thesis Banner -->
+            <div style="padding: 14px 20px; border-radius: 8px; background: rgba(0, 240, 255, 0.05); border: 1px solid rgba(0, 240, 255, 0.2); display: flex; align-items: center; justify-content: space-between;">
+              <span style="color: #38bdf8; font-weight: 600; font-family: 'JetBrains Mono', monospace; font-size: 12.5px;">${guide.tagline}</span>
+              <span class="datum-tag" style="border-color: rgba(0, 240, 255, 0.4); color: #00f0ff;">SYSTEM DESIGN</span>
+            </div>
+
+            <!-- Topic Body & Deep-Dive Interactive Lab -->
+            ${this.renderTopicBody(guide)}
+          </div>
+
+          <!-- Footer Bar -->
+          <div style="padding: 12px 24px; border-top: 1px solid rgba(255, 255, 255, 0.08); background: rgba(8, 12, 22, 0.95); display: flex; align-items: center; justify-content: space-between; font-size: 11.5px; color: #64748b; font-family: 'JetBrains Mono', monospace;">
+            <span>SALESFORCE ORG AXONOMETRIC MASTERPLAN // ENTERPRISE REFERENCE ARCHITECTURE</span>
+            <button id="btn-close-modal-footer" class="action-btn-primary" style="padding: 6px 14px; font-size: 11.5px;">
+              Return to Masterplan
+            </button>
+          </div>
+        </div>
+      </div>
+    `;
+
+    this.container.querySelector('#btn-close-modal').onclick = () => this.hide();
+    this.container.querySelector('#btn-close-modal-footer').onclick = () => this.hide();
+
+    this.container.querySelectorAll('.tab-btn').forEach(btn => {
+      btn.onclick = () => this.setTopic(btn.dataset.topic);
+    });
+
+    this.bindInteractiveWidgets();
+  }
+
+  renderTopicBody(guide) {
+    if (this.activeTopic === 'headless360') {
+      return `
+        <!-- Thesis & Core Architecture -->
+        <div>
+          <h2 style="font-size: 15px; font-weight: 700; color: #ffffff; margin: 0 0 8px;">The Architectural Shift: Why Browser CRM (LEX) Fails AI Agents</h2>
+          <p style="margin: 0; color: #94a3b8; font-size: 13px;">
+            Traditional Salesforce Lightning Experience (LEX) was built for human eyes rendering bloated DOM trees on desktop browsers. Autonomous AI agents and high-throughput microservices cannot and should not drive brittle browser DOMs. Headless 360 decouples the <strong>System of Context</strong> (Data Cloud) and <strong>System of Action</strong> (Apex, Flows) into pure, typed, composable APIs.
+          </p>
+        </div>
+
+        <!-- 4 Layers of Headless 360 Architecture Section -->
+        <div>
+          <h3 style="font-size: 13px; font-weight: 700; color: #ffffff; margin: 0 0 12px; text-transform: uppercase; letter-spacing: 0.04em;">The 4-Layer Headless Architectural Section</h3>
+          <div style="display: flex; flex-direction: column; gap: 8px;">
+            ${guide.fourLayers.map((l, idx) => `
+              <div class="arch-card" style="border-left: 4px solid ${l.color}; padding: 14px 18px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                  <span style="font-weight: 700; color: ${l.color}; font-size: 13px;">${l.layer}</span>
+                  <span style="font-size: 11px; color: #94a3b8; font-family: 'JetBrains Mono', monospace;">${l.components}</span>
+                </div>
+                <div style="color: #cbd5e1; font-size: 12px;">${l.description}</div>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+
+        <!-- Network Waterfall Profiler (Interactive) -->
+        <div>
+          <h3 style="font-size: 13px; font-weight: 700; color: #ffffff; margin: 0 0 10px; text-transform: uppercase; letter-spacing: 0.04em;">Network Latency & Payload Benchmark</h3>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px;">
+            <div class="arch-card" style="border-color: rgba(255, 69, 58, 0.3); background: rgba(255, 69, 58, 0.04);">
+              <div style="font-weight: 700; color: #ff453a; font-size: 13px; margin-bottom: 8px;">Traditional Monolithic LEX Browser Session</div>
+              <div style="display: flex; flex-direction: column; gap: 6px; font-size: 12px;">
+                <div style="display: flex; justify-content: space-between;"><span style="color: #94a3b8;">Asset Transfer Size:</span> <span style="color: #ff453a; font-weight: 700; font-family: 'JetBrains Mono', monospace;">14.8 MB (Aura/LWC)</span></div>
+                <div style="display: flex; justify-content: space-between;"><span style="color: #94a3b8;">HTTP Roundtrips:</span> <span style="color: #ff453a; font-weight: 700; font-family: 'JetBrains Mono', monospace;">142 Requests</span></div>
+                <div style="display: flex; justify-content: space-between;"><span style="color: #94a3b8;">DOM Ready Time:</span> <span style="color: #ff453a; font-weight: 700; font-family: 'JetBrains Mono', monospace;">3,240 ms</span></div>
+                <div style="display: flex; justify-content: space-between;"><span style="color: #94a3b8;">Agent Interface:</span> <span style="color: #94a3b8;">Brittle DOM Scrapers (Fails often)</span></div>
+              </div>
+            </div>
+
+            <div class="arch-card" style="border-color: rgba(16, 185, 129, 0.35); background: rgba(16, 185, 129, 0.04);">
+              <div style="font-weight: 700; color: #10b981; font-size: 13px; margin-bottom: 8px;">Headless 360 Composable Architecture</div>
+              <div style="display: flex; flex-direction: column; gap: 6px; font-size: 12px;">
+                <div style="display: flex; justify-content: space-between;"><span style="color: #94a3b8;">Payload Transfer Size:</span> <span style="color: #10b981; font-weight: 700; font-family: 'JetBrains Mono', monospace;">2.1 KB (GraphQL JSON)</span></div>
+                <div style="display: flex; justify-content: space-between;"><span style="color: #94a3b8;">HTTP Roundtrips:</span> <span style="color: #10b981; font-weight: 700; font-family: 'JetBrains Mono', monospace;">1 Single HTTP/2 Call</span></div>
+                <div style="display: flex; justify-content: space-between;"><span style="color: #94a3b8;">State Execution Time:</span> <span style="color: #10b981; font-weight: 700; font-family: 'JetBrains Mono', monospace;">42 ms</span></div>
+                <div style="display: flex; justify-content: space-between;"><span style="color: #94a3b8;">Agent Interface:</span> <span style="color: #10b981; font-weight: 700;">Native Typed Model Context Protocol</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Live Headless GraphQL Workbench -->
+        <div>
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+            <span style="font-weight: 700; color: #ffffff; font-size: 13px;">Live Headless GraphQL API Query</span>
+            <span class="datum-tag" style="color: #10b981;">ENDPOINT: /services/data/v66.0/graphql</span>
+          </div>
+          <pre><code>${escapeHtml(guide.sampleCode.code)}</code></pre>
+        </div>
+      `;
+    } else if (this.activeTopic === 'agentforce') {
+      return `
+        <!-- Autonomous Atlas Thesis -->
+        <div>
+          <h2 style="font-size: 15px; font-weight: 700; color: #ffffff; margin: 0 0 8px;">Autonomous Reasoning vs. Deterministic Scripting</h2>
+          <p style="margin: 0; color: #94a3b8; font-size: 13px;">
+            Agentforce is not a chatbot. It is Salesforce's autonomous agent framework governed by the <strong>Atlas Reasoning Engine</strong>. Unlike rigid if-then decision trees, Atlas runs a closed-loop architectural cycle: perceiving intent, screening through the Einstein Trust Layer, routing to scoped enterprise topics, grounding in Data Cloud's semantic graph, and planning deterministic invocable tool calls.
+          </p>
+        </div>
+
+        <!-- 6-Stage Atlas State Machine -->
+        <div>
+          <h3 style="font-size: 13px; font-weight: 700; color: #ffffff; margin: 0 0 10px; text-transform: uppercase; letter-spacing: 0.04em;">The Atlas Reasoning State Machine</h3>
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 10px;">
+            ${guide.atlasCycle.map(s => `
+              <div class="arch-card" style="border-color: rgba(168, 85, 247, 0.25);">
+                <div style="display: flex; align-items: center; gap: 8px; font-weight: 700; color: #c084fc; font-size: 12.5px; margin-bottom: 4px;">
+                  <span>${s.icon}</span>
+                  <span>${s.step}</span>
+                </div>
+                <div style="color: #94a3b8; font-size: 11.5px;">${s.description}</div>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+
+        <!-- Interactive Simulation Workbench -->
+        <div class="arch-card" style="border-color: rgba(168, 85, 247, 0.4); display: flex; flex-direction: column; gap: 14px;">
+          <div style="display: flex; align-items: center; justify-content: space-between;">
+            <div>
+              <h3 style="margin: 0; font-size: 14px; font-weight: 700; color: #d8b4fe;">🧪 Interactive Atlas Reasoning Simulation Workbench</h3>
+              <p style="margin: 2px 0 0; color: #94a3b8; font-size: 11.5px;">Select an operational scenario to step through the perception-reasoning-action state machine:</p>
+            </div>
+            <span class="datum-tag" style="border-color: #a855f7; color: #c084fc;">STATE TRANSITION SIMULATOR</span>
+          </div>
+
+          <div style="display: flex; gap: 10px;">
+            <button id="sim-scenario-1" class="action-btn-primary" style="font-size: 12px; padding: 8px 14px;">
+              Scenario A: Cold-Chain Telemetry Excursion (P0)
+            </button>
+            <button id="sim-scenario-2" class="action-btn-primary" style="font-size: 12px; padding: 8px 14px;">
+              Scenario B: VIP Consignee Flood Infiltration
+            </button>
+          </div>
+
+          <div id="atlas-sim-output" style="padding: 16px; background: #050811; border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 8px; font-family: 'JetBrains Mono', monospace; font-size: 11.5px; min-height: 150px; display: flex; flex-direction: column; gap: 8px;">
+            <div style="color: #64748b;">// Select a scenario button above to initiate the Atlas perception loop...</div>
+          </div>
+        </div>
+
+        <!-- Invocable Apex Action -->
+        <div>
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+            <span style="font-weight: 700; color: #ffffff; font-size: 13px;">Invocable Apex Tool Contract (WITH USER_MODE)</span>
+            <span class="datum-tag" style="color: #c084fc;">CATEGORY: AGENTFORCE</span>
+          </div>
+          <pre><code>${escapeHtml(guide.sampleCode.code)}</code></pre>
+        </div>
+      `;
+    } else if (this.activeTopic === 'claudeforce') {
+      return `
+        <!-- Claudeforce Architectural Thesis -->
+        <div>
+          <h2 style="font-size: 15px; font-weight: 700; color: #ffffff; margin: 0 0 8px;">Claude 3.5 Sonnet: The Frontier Cognitive Co-Architect</h2>
+          <p style="margin: 0; color: #94a3b8; font-size: 13px;">
+            Claudeforce embodies the deep integration of Anthropic Claude 3.5 Sonnet into the Salesforce architectural fabric. With a <strong>200,000 token context window</strong>, Claude can ingest entire enterprise metadata catalogs, complex multi-object ERDs, and 50+ Apex classes in a single prompt to audit architecture, synthesize governor-limit compliant Apex (<code>WITH USER_MODE</code>), and parse messy physical paperwork via multi-modal vision.
+          </p>
+        </div>
+
+        <!-- Core Architectural Pillars -->
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 12px;">
+          ${guide.corePowers.map(p => `
+            <div class="arch-card" style="border-color: rgba(249, 115, 22, 0.25);">
+              <div style="font-weight: 700; color: #fb923c; font-size: 13px; margin-bottom: 4px;">⚡ ${p.title}</div>
+              <div style="color: #94a3b8; font-size: 11.5px;">${p.description}</div>
+            </div>
+          `).join('')}
+        </div>
+
+        <!-- Multi-Modal Ingestion Pipeline Walkthrough -->
+        <div class="arch-card" style="border-color: rgba(249, 115, 22, 0.4); display: flex; flex-direction: column; gap: 10px;">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <h3 style="margin: 0; font-size: 14px; font-weight: 700; color: #fdba74;">👁️ Multi-Modal Bill of Lading (BOL) Extraction Pipeline</h3>
+            <span class="datum-tag" style="border-color: #f97316; color: #fb923c;">VISION TO SOQL/DML</span>
+          </div>
+          ${guide.workflowExample.map(w => `
+            <div style="display: flex; gap: 12px; font-size: 12px;">
+              <span style="color: #fb923c; font-weight: 700; font-family: 'JetBrains Mono', monospace; white-space: nowrap;">${w.step}:</span>
+              <span style="color: #cbd5e1;">${w.text}</span>
+            </div>
+          `).join('')}
+        </div>
+
+        <!-- System Prompt Code -->
+        <div>
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+            <span style="font-weight: 700; color: #ffffff; font-size: 13px;">Claudeforce System Prompt & Architectural Guardrails</span>
+            <span class="datum-tag" style="color: #fb923c;">ANTHROPIC SDK V1</span>
+          </div>
+          <pre><code>${escapeHtml(guide.sampleCode.code)}</code></pre>
+        </div>
+      `;
+    } else if (this.activeTopic === 'mcpApis') {
+      return `
+        <!-- Dual Plane Thesis -->
+        <div>
+          <h2 style="font-size: 15px; font-weight: 700; color: #ffffff; margin: 0 0 8px;">The Dual-Plane Hosted Model Context Protocol (MCP) Architecture</h2>
+          <p style="margin: 0; color: #94a3b8; font-size: 13px;">
+            Salesforce implements the Model Context Protocol (MCP) across two strictly separated hosted planes. <strong>Collapsing the two planes is an architectural anti-pattern</strong>: Plane 1 acts as the System of Context (reading and searching the data lake and unified graph), while Plane 2 acts as the System of Action (executing governed state mutations under strict user mode security).
+          </p>
+        </div>
+
+        <!-- Dual Planes Architectural Comparison Matrix -->
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+          ${guide.dualPlanes.map(p => `
+            <div style="padding: 18px; border-radius: 12px; border: 1px solid ${p.color}55; background: ${p.color}08; display: flex; flex-direction: column; justify-content: space-between;">
+              <div>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                  <span style="font-weight: 700; font-size: 14px; color: ${p.color};">${p.plane}</span>
+                  <span class="datum-tag" style="color: #ffffff;">${p.status}</span>
+                </div>
+                <div style="font-size: 11px; color: #94a3b8; font-family: 'JetBrains Mono', monospace; margin-bottom: 12px;">${p.endpoint}</div>
+
+                <div style="margin-bottom: 14px;">
+                  <div style="font-size: 11px; font-weight: 700; color: #ffffff; margin-bottom: 6px; text-transform: uppercase;">Standardized Tools Interface:</div>
+                  <ul style="margin: 0; padding-left: 18px; font-family: 'JetBrains Mono', monospace; font-size: 11px; color: #cbd5e1; display: flex; flex-direction: column; gap: 4px;">
+                    ${p.tools.map(t => `<li>${t}</li>`).join('')}
+                  </ul>
+                </div>
+              </div>
+
+              <div style="padding-top: 10px; border-top: 1px solid rgba(255, 255, 255, 0.08); font-size: 11.5px; color: #94a3b8;">
+                <strong style="color: #ffffff;">Trust Boundary:</strong> ${p.security}
+              </div>
+            </div>
+          `).join('')}
+        </div>
+
+        <!-- Live MCP Terminal Emulator -->
+        <div class="arch-card" style="border-color: rgba(236, 72, 153, 0.4); display: flex; flex-direction: column; gap: 12px;">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <h3 style="margin: 0; font-size: 14px; font-weight: 700; color: #f472b6;">⚡ Live Model Context Protocol (MCP) Client Inspector</h3>
+            <span class="datum-tag" style="border-color: #ec4899; color: #f472b6;">JSON-RPC 2.0 PROTOCOL</span>
+          </div>
+          
+          <div style="display: flex; gap: 10px;">
+            <button id="btn-mcp-plane1" class="action-btn-primary" style="font-size: 11.5px; padding: 7px 12px;">
+              Query Plane 1 (Data 360 Context)
+            </button>
+            <button id="btn-mcp-plane2" class="action-btn-primary" style="font-size: 11.5px; padding: 7px 12px;">
+              Dispatch Plane 2 (Headless 360 Action)
+            </button>
+          </div>
+
+          <div id="mcp-terminal-output" style="padding: 14px; background: #050811; border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 8px; font-family: 'JetBrains Mono', monospace; font-size: 11.5px; min-height: 140px; display: flex; flex-direction: column; gap: 6px;">
+            <div style="color: #64748b;">// Click an MCP plane query button above to inspect live JSON-RPC frames...</div>
+          </div>
+        </div>
+
+        <!-- Modern API Landscape -->
+        <div>
+          <h3 style="font-size: 13px; font-weight: 700; color: #ffffff; margin: 0 0 10px; text-transform: uppercase; letter-spacing: 0.04em;">Salesforce Modern API Architecture</h3>
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px;">
+            ${guide.apiLandscape.map(api => `
+              <div class="arch-card" style="padding: 12px;">
+                <div style="font-weight: 700; color: #f472b6; font-size: 12px;">${api.name}</div>
+                <div style="font-size: 10px; color: #94a3b8; font-weight: 600; text-transform: uppercase; margin-bottom: 4px;">${api.type}</div>
+                <div style="font-size: 11.5px; color: #cbd5e1;">${api.bestFor}</div>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      `;
+    } else {
+      return `
+        <!-- Semantic Layer Matrix -->
+        <div>
+          <h2 style="font-size: 15px; font-weight: 700; color: #ffffff; margin: 0 0 8px;">The Three Evolutionary Tiers of Salesforce Architecture</h2>
+          <p style="margin: 0; color: #94a3b8; font-size: 13px;">
+            To understand Salesforce as an architectural masterplan, one must distinguish between the <strong>physical relational tables</strong> (storage), the <strong>declarative metadata layer</strong> (schema, relationships, security), and the <strong>semantic layer</strong> (ontologies, identity graphs, and calculated insights that ground AI).
+          </p>
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: 14px;">
+          ${guide.tiers.map(t => `
+            <div class="arch-card" style="border-left: 4px solid #38bdf8; padding: 18px;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                <span style="font-weight: 700; font-size: 14px; color: #38bdf8;">${t.tier}</span>
+                <span class="datum-tag">${t.metaphor}</span>
+              </div>
+              <div style="font-size: 12px; color: #94a3b8; margin-bottom: 6px; font-family: 'JetBrains Mono', monospace;"><strong style="color: #ffffff;">Underlying Engine:</strong> ${t.technology}</div>
+              <div style="font-size: 12.5px; color: #cbd5e1; margin-bottom: 8px;">${t.content}</div>
+              <div style="font-size: 11.5px; color: #34d399; font-weight: 600;">Audience & Surface: ${t.visibility}</div>
+            </div>
+          `).join('')}
+        </div>
+      `;
+    }
+  }
+
+  bindInteractiveWidgets() {
+    const simBtn1 = this.container.querySelector('#sim-scenario-1');
+    const simBtn2 = this.container.querySelector('#sim-scenario-2');
+    const simOutput = this.container.querySelector('#atlas-sim-output');
+
+    if (simBtn1 && simOutput) {
+      simBtn1.onclick = () => {
+        sfx.simulationStep();
+        simOutput.innerHTML = `
+          <div style="color: #c084fc; font-weight: 700;">[STAGE 1: PERCEPTION] Inbound Telemetry: Sensor DC-HYD-04 records 9.2°C Excursion (Shipment SH-88392)</div>
+          <div style="color: #94a3b8;">[STAGE 2: TRUST LAYER] De-identifying patient PII -> Synthetic token. Checking toxicity score (0.001 - PASS).</div>
+          <div style="color: #facc15; font-weight: 700;">[STAGE 3: TOPIC ROUTING] Matched Topic: "ColdChain_Rescue" (Confidence: 0.992)</div>
+          <div style="color: #38bdf8;">[STAGE 4: SEMANTIC GROUNDING] Data 360 Golden Record queried -> Linked to Dr. Meera Reddy (VIP Household UID-88291).</div>
+          <div style="color: #10b981; font-weight: 700;">[STAGE 5: ACTION DISPATCH] Invoking Invocable Apex: INDRA_UnifiedContextService.executeRescue()</div>
+          <div style="color: #34d399; font-weight: 700;">[STAGE 6: AUDIT & OUTPUT] P0 Care Case CASE-99120 inserted AS USER. Drone flight rerouted to Banjara Hills. Audit logged to BigObject.</div>
+        `;
+      };
+    }
+
+    if (simBtn2 && simOutput) {
+      simBtn2.onclick = () => {
+        sfx.simulationStep();
+        simOutput.innerHTML = `
+          <div style="color: #c084fc; font-weight: 700;">[STAGE 1: PERCEPTION] Inbound Signal: Waterlogging exception in Jubilee Hills grid transit zone.</div>
+          <div style="color: #94a3b8;">[STAGE 2: TRUST LAYER] Evaluating harm and enterprise SLA compliance bounds.</div>
+          <div style="color: #facc15; font-weight: 700;">[STAGE 3: TOPIC ROUTING] Matched Topic: "Monsoon_Flood_Reroute" (Confidence: 0.985)</div>
+          <div style="color: #38bdf8;">[STAGE 4: SEMANTIC GROUNDING] Calculated Insights: Depot Stress Index = 94.2 kW. SOP Vector retrieved.</div>
+          <div style="color: #10b981; font-weight: 700;">[STAGE 5: ACTION DISPATCH] Firing Autolaunched Flow + Headless Slack Block Kit message.</div>
+          <div style="color: #34d399; font-weight: 700;">[STAGE 6: AUDIT & OUTPUT] Operations Concierge Ananya Rao notified in Slack with 1-click rescue authorization.</div>
+        `;
+      };
+    }
+
+    const mcpBtn1 = this.container.querySelector('#btn-mcp-plane1');
+    const mcpBtn2 = this.container.querySelector('#btn-mcp-plane2');
+    const mcpOutput = this.container.querySelector('#mcp-terminal-output');
+
+    if (mcpBtn1 && mcpOutput) {
+      mcpBtn1.onclick = () => {
+        sfx.simulationStep();
+        mcpOutput.innerHTML = `
+          <div style="color: #06b6d4;">--> JSON-RPC POST /platform/mcp/v1/data/data360</div>
+          <div style="color: #94a3b8;">{"jsonrpc":"2.0","method":"tools/call","params":{"name":"data360_search","arguments":{"query":"UnifiedIndividual__dlm WHERE CareRisk__c > 80"}},"id":"req-01"}</div>
+          <div style="color: #38bdf8;"><-- HTTP/2 200 OK (18ms)</div>
+          <div style="color: #6ee7b7;">{"jsonrpc":"2.0","result":{"matched_nodes":1,"golden_record":{"uid":"UID-88291","name":"Dr. Meera Reddy","risk_score":88.4}},"id":"req-01"}</div>
+        `;
+      };
+    }
+
+    if (mcpBtn2 && mcpOutput) {
+      mcpBtn2.onclick = () => {
+        sfx.simulationStep();
+        mcpOutput.innerHTML = `
+          <div style="color: #ec4899;">--> JSON-RPC POST /platform/mcp/v1/platform/headless-360</div>
+          <div style="color: #94a3b8;">{"jsonrpc":"2.0","method":"tools/call","params":{"name":"headless360_dispatch","arguments":{"action":"create_case","fields":{"Subject":"Cold-Chain Excursion Rescue","Priority":"P0"}}},"id":"req-02"}</div>
+          <div style="color: #f472b6;"><-- HTTP/2 200 OK (24ms) [Enforcing FLS & WITH USER_MODE]</div>
+          <div style="color: #34d399; font-weight: 700;">{"jsonrpc":"2.0","result":{"status":"SUCCESS","recordId":"5008800000XyZ1A","audit_logged":true},"id":"req-02"}</div>
+        `;
+      };
+    }
+  }
+}
+
+function escapeHtml(str) {
+  return str
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+
+  
+
+class CommandPalette {
+  constructor(container, catalog, onSelectBuilding, onSelectConcept) {
+    this.container = container;
+    this.catalog = catalog;
+    this.onSelectBuilding = onSelectBuilding;
+    this.onSelectConcept = onSelectConcept;
+    this.isOpen = false;
+    this.selectedIndex = 0;
+    this.filteredItems = [];
+
+    this.initItems();
+    this.bindGlobalKeys();
+  }
+
+  initItems() {
+    this.allItems = [];
+
+    // 1. Buildings
+    this.catalog.buildings.forEach(b => {
+      this.allItems.push({
+        type: 'building',
+        category: 'BUILDING / DISTRICT',
+        id: b.id,
+        title: b.name,
+        subtitle: `${b.subtitle} • District: ${b.districtId}`,
+        tags: b.tags || [],
+        color: b.color || '#38bdf8',
+        icon: '🏢',
+        raw: b
+      });
+    });
+
+    // 2. Concepts
+    const concepts = [
+      { id: 'headless360', title: 'Headless 360 Architecture', subtitle: 'The API is the UI. Decoupled HXL, GraphQL & Composite APIs', category: 'SYSTEM CONCEPT', icon: '🚀', color: '#10b981' },
+      { id: 'agentforce', title: 'Agentforce & Atlas Reasoning Loop', subtitle: 'Autonomous Perception, Grounding & Invocable Execution', category: 'SYSTEM CONCEPT', icon: '🤖', color: '#a855f7' },
+      { id: 'claudeforce', title: 'Claudeforce (Claude 3.5 Sonnet)', subtitle: '200k Context Auditing, Multi-modal Vision & Apex Synthesis', category: 'SYSTEM CONCEPT', icon: '🧠', color: '#f97316' },
+      { id: 'mcpApis', title: 'Dual-Plane Hosted MCP Architecture', subtitle: 'Plane 1 (Context data360) vs Plane 2 (Action headless-360)', category: 'SYSTEM CONCEPT', icon: '🔌', color: '#ec4899' },
+      { id: 'semanticMatrix', title: 'Semantic Layer vs Metadata Matrix', subtitle: 'Three Tiers: Relational DB -> Declarative Metadata -> Semantic Graph', category: 'SYSTEM CONCEPT', icon: '🏢', color: '#00f0ff' }
+    ];
+
+    concepts.forEach(c => {
+      this.allItems.push({
+        type: 'concept',
+        category: 'ARCHITECTURE CONCEPT',
+        id: c.id,
+        title: c.title,
+        subtitle: c.subtitle,
+        tags: ['architecture', 'guide', 'deep-dive'],
+        color: c.color,
+        icon: c.icon
+      });
+    });
+
+    // 3. Specific SObjects & Schemas
+    const schemas = [
+      { id: 'b_standard_objects', title: 'Account & Contact (Standard SObjects)', subtitle: 'Core relational entities with FLS & Record Types', category: 'METADATA SCHEMA', icon: '📦', color: '#38bdf8' },
+      { id: 'b_custom_objects', title: 'Logistics_Depot__c (Custom SObject)', subtitle: 'Physical facility node with cold-chain capacity', category: 'METADATA SCHEMA', icon: '📦', color: '#38bdf8' },
+      { id: 'b_flow_plant', title: 'INDRA_Autolaunched_Rescue (Flow)', subtitle: 'Declarative transactional orchestration engine', category: 'LOGIC & AUTOMATION', icon: '⚡', color: '#f59e0b' },
+      { id: 'b_apex_foundry', title: 'INDRA_UnifiedContextService.cls (Apex)', subtitle: 'Invocable Apex executed WITH USER_MODE', category: 'LOGIC & AUTOMATION', icon: '⚡', color: '#f59e0b' },
+      { id: 'b_data_refinery', title: 'UnifiedIndividual__dlm (Data Cloud DMO)', subtitle: 'Deterministic & probabilistic Golden Record entity', category: 'SEMANTIC GRAPH', icon: '🌊', color: '#06b6d4' },
+      { id: 'b_calculated_insights', title: 'Care_Risk_Score__cio (Calculated Insight)', subtitle: 'Continuous SQL aggregations over streaming lakes', category: 'SEMANTIC GRAPH', icon: '🌊', color: '#06b6d4' },
+      { id: 'b_mcp_action', title: 'headless360_dispatch (MCP Tool)', subtitle: 'Plane 2 Action dispatcher enforcing user context', category: 'MCP TOOLS', icon: '🔌', color: '#ec4899' }
+    ];
+
+    schemas.forEach(s => {
+      this.allItems.push({
+        type: 'building',
+        category: s.category,
+        id: s.id,
+        title: s.title,
+        subtitle: s.subtitle,
+        tags: ['schema', 'code', 'metadata'],
+        color: s.color,
+        icon: s.icon
+      });
+    });
+  }
+
+  bindGlobalKeys() {
+    window.addEventListener('keydown', (e) => {
+      if ((e.metaKey || e.ctrlKey) && (e.key === 'k' || e.key === 'K')) {
+        e.preventDefault();
+        this.toggle();
+      } else if (e.key === 'Escape' && this.isOpen) {
+        this.close();
+      }
+    });
+  }
+
+  toggle() {
+    if (this.isOpen) {
+      this.close();
+    } else {
+      this.open();
+    }
+  }
+
+  open() {
+    this.isOpen = true;
+    this.selectedIndex = 0;
+    this.container.classList.remove('hidden');
+    this.render();
+    sfx.openModal();
+
+    setTimeout(() => {
+      const input = this.container.querySelector('#command-search-input');
+      if (input) input.focus();
+    }, 50);
+  }
+
+  close() {
+    this.isOpen = false;
+    this.container.classList.add('hidden');
+    sfx.closeModal();
+  }
+
+  filter(query) {
+    const q = query.toLowerCase().trim();
+    if (!q) {
+      this.filteredItems = this.allItems.slice(0, 8);
+    } else {
+      this.filteredItems = this.allItems.filter(item => {
+        const titleMatch = item.title.toLowerCase().includes(q);
+        const subMatch = item.subtitle.toLowerCase().includes(q);
+        const tagMatch = item.tags && item.tags.some(t => t.toLowerCase().includes(q));
+        const catMatch = item.category.toLowerCase().includes(q);
+        return titleMatch || subMatch || tagMatch || catMatch;
+      });
+    }
+    this.selectedIndex = Math.min(this.selectedIndex, Math.max(0, this.filteredItems.length - 1));
+    this.renderList();
+  }
+
+  selectItem(index) {
+    const item = this.filteredItems[index];
+    if (!item) return;
+
+    this.close();
+    sfx.click();
+
+    if (item.type === 'building') {
+      if (this.onSelectBuilding) {
+        this.onSelectBuilding(item.id);
+      }
+    } else if (item.type === 'concept') {
+      if (this.onSelectConcept) {
+        this.onSelectConcept(item.id);
+      }
+    }
+  }
+
+  render() {
+    this.container.innerHTML = `
+      <div class="modal-overlay" style="align-items: flex-start; padding-top: 12vh;">
+        <div class="palette-window" style="width: 100%; max-width: 640px; background: rgba(10, 15, 26, 0.96); backdrop-filter: blur(28px); border: 1px solid rgba(255, 255, 255, 0.15); border-radius: 12px; box-shadow: 0 30px 70px rgba(0, 0, 0, 0.9), 0 0 40px rgba(0, 240, 255, 0.2); overflow: hidden; display: flex; flex-direction: column;">
+          
+          <!-- Search Input Header -->
+          <div style="padding: 14px 18px; border-bottom: 1px solid rgba(255, 255, 255, 0.1); display: flex; align-items: center; gap: 12px; background: rgba(5, 8, 16, 0.6);">
+            <span style="font-size: 16px; color: #38bdf8;">🔍</span>
+            <input id="command-search-input" type="text" placeholder="Search SObjects, Flows, DMOs, Apex, or Concepts (e.g. Atlas, Golden Record, MCP)..." 
+              style="flex: 1; background: transparent; border: none; outline: none; font-size: 13.5px; font-family: var(--font-sans); color: #ffffff; caret-color: #00f0ff;" />
+            <span class="datum-tag" style="font-size: 9.5px; font-family: 'JetBrains Mono', monospace;">ESC TO EXIT</span>
+          </div>
+
+          <!-- Results List Container -->
+          <div id="palette-results" style="max-height: 380px; overflow-y: auto; padding: 8px 0; display: flex; flex-direction: column;">
+            <!-- Populated dynamically -->
+          </div>
+
+          <!-- Footer Tips -->
+          <div style="padding: 10px 18px; border-top: 1px solid rgba(255, 255, 255, 0.08); background: rgba(5, 8, 16, 0.8); display: flex; align-items: center; justify-content: space-between; font-size: 11px; color: #64748b; font-family: 'JetBrains Mono', monospace;">
+            <span>↑ ↓ TO NAVIGATE</span>
+            <span>↵ TO SELECT & FLY CAMERA</span>
+          </div>
+        </div>
+      </div>
+    `;
+
+    const input = this.container.querySelector('#command-search-input');
+    input.addEventListener('input', (e) => this.filter(e.target.value));
+    input.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        this.selectedIndex = (this.selectedIndex + 1) % Math.max(1, this.filteredItems.length);
+        this.renderList();
+      } else if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        this.selectedIndex = (this.selectedIndex - 1 + this.filteredItems.length) % Math.max(1, this.filteredItems.length);
+        this.renderList();
+      } else if (e.key === 'Enter') {
+        e.preventDefault();
+        this.selectItem(this.selectedIndex);
+      }
+    });
+
+    this.container.querySelector('.modal-overlay').addEventListener('click', (e) => {
+      if (e.target.classList.contains('modal-overlay')) {
+        this.close();
+      }
+    });
+
+    this.filter('');
+  }
+
+  renderList() {
+    const listEl = this.container.querySelector('#palette-results');
+    if (!listEl) return;
+
+    if (this.filteredItems.length === 0) {
+      listEl.innerHTML = `
+        <div style="padding: 24px; text-align: center; color: #64748b; font-size: 12px; font-family: 'JetBrains Mono', monospace;">
+          No matching architectural nodes or concepts found.
+        </div>
+      `;
+      return;
+    }
+
+    listEl.innerHTML = this.filteredItems.map((item, idx) => {
+      const isSelected = idx === this.selectedIndex;
+      return `
+        <div class="palette-item" data-index="${idx}" style="padding: 10px 18px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; transition: all 0.1s; background: ${isSelected ? 'rgba(56, 189, 248, 0.12)' : 'transparent'}; border-left: 3px solid ${isSelected ? item.color : 'transparent'};">
+          <div style="display: flex; align-items: center; gap: 12px;">
+            <div style="width: 30px; height: 30px; border-radius: 6px; background: ${item.color}15; border: 1px solid ${item.color}44; display: flex; align-items: center; justify-content: center; font-size: 14px;">
+              ${item.icon}
+            </div>
+            <div>
+              <div style="font-size: 13px; font-weight: 600; color: ${isSelected ? '#ffffff' : '#cbd5e1'};">
+                ${item.title}
+              </div>
+              <div style="font-size: 11px; color: #94a3b8;">
+                ${item.subtitle}
+              </div>
+            </div>
+          </div>
+          <span class="datum-tag" style="font-size: 9px; color: ${item.color}; border-color: ${item.color}44;">
+            ${item.category}
+          </span>
+        </div>
+      `;
+    }).join('');
+
+    listEl.querySelectorAll('.palette-item').forEach(el => {
+      el.addEventListener('mouseenter', () => {
+        this.selectedIndex = parseInt(el.dataset.index, 10);
+        this.renderList();
+      });
+      el.addEventListener('click', () => {
+        this.selectItem(parseInt(el.dataset.index, 10));
+      });
+    });
+
+    const activeEl = listEl.querySelector(`[data-index="${this.selectedIndex}"]`);
+    if (activeEl) {
+      activeEl.scrollIntoView({ block: 'nearest' });
+    }
+  }
+}
+
+  
+
+const TOUR_STOPS = [
+  {
+    step: 1,
+    title: 'The Relational Bedrock: Metadata Citadel',
+    subtitle: 'Declarative Objects, Field-Level Security & Sharing Architecture',
+    buildingId: 'b_standard_objects',
+    districtId: 'metadata',
+    narrative: 'Every Salesforce org begins here. Before writing a line of code or deploying an AI agent, declarative metadata defines the relational schema (Account, Contact, Custom SObjects), multi-tenant tenancy boundaries, Field-Level Security (FLS), and Organization-Wide Defaults (OWD). This layer guarantees deterministic data integrity and row-level enterprise authorization.',
+    keyTakeaway: 'Metadata is not just a schema—it is the immutable security boundary of the enterprise.'
+  },
+  {
+    step: 2,
+    title: 'The Execution Grid: Logic & Event Automation',
+    subtitle: 'Apex Runtime WITH USER_MODE, Record Flows & Kafka Platform Events',
+    buildingId: 'b_apex_foundry',
+    districtId: 'automation',
+    narrative: 'When state changes occur, the Logic Grid takes command. Apex code executes with strict Governor Limits to prevent CPU/heap hogging, enforced WITH USER_MODE for compile-time permission verification. Asynchronous Kafka Platform Events decouple heavy processing, allowing sub-second real-time reaction across external fleets without blocking end users.',
+    keyTakeaway: 'Deterministic transactional logic ensures automated guarantees at multi-tenant scale.'
+  },
+  {
+    step: 3,
+    title: 'The Semantic Harbor: Data Cloud & Context Lake',
+    subtitle: 'Data Lake Ingestion (DLOs), DMO Harmonization & Golden Identity Graph',
+    buildingId: 'b_data_lake',
+    districtId: 'semantic',
+    narrative: 'Relational databases only see fragmented transactions. The Semantic Harbor ingests millions of unstructured telemetry events and legacy silos into Data Lake Objects (DLOs), mapping them to Cloud Information Model (CIM) DMOs. Probabilistic Identity Resolution unifies disparate touchpoints into a single Golden Record, while Calculated Insights continuously derive real-time risk scores.',
+    keyTakeaway: 'The Semantic Layer provides the unified meaning and context graph that grounds AI reasoning.'
+  },
+  {
+    step: 4,
+    title: 'The Decoupled Skyport: Headless 360',
+    subtitle: 'The API is the UI. Decoupled HXL, GraphQL & Composite Graphs',
+    buildingId: 'b_headless_gateway',
+    districtId: 'headless',
+    narrative: 'Traditional browser Lightning Experience (LEX) renders heavy 14.8MB DOM trees meant for human clicks. Headless 360 collapses this into pure, composable APIs: a single GraphQL HTTP/2 call returns 2.1KB of typed payload in 42ms. The Headless Experience Layer (HXL) projects CRM directly into Slack, mobile handhelds, and external agent runtimes.',
+    keyTakeaway: 'Eliminate browser bloat: agents and automated workers consume pure headless APIs.'
+  },
+  {
+    step: 5,
+    title: 'The Cognitive Spire: Agentforce & Atlas Engine',
+    subtitle: 'Autonomous Perception, Grounding, Topic Routing & Invocable Execution',
+    buildingId: 'b_agentforce_core',
+    districtId: 'agentforce',
+    narrative: 'Agentforce is not a chatbot—it is an autonomous reasoning engine (Atlas) operating in a closed perception-planning-action-evaluation loop. When an operational signal arrives, Atlas masks PII through the Einstein Trust Layer, routes to a locked business topic, grounds in Data Cloud context, synthesizes an execution plan, and executes Invocable Apex tools.',
+    keyTakeaway: 'Atlas replaces rigid if-then trees with dynamic, governed autonomous reasoning.'
+  },
+  {
+    step: 6,
+    title: 'Frontier Co-Architect: Claudeforce Intelligence',
+    subtitle: 'Anthropic Claude 3.5 Sonnet: 200k Context & Multimodal Vision Ingestion',
+    buildingId: 'b_claudeforce_lab',
+    districtId: 'claudeforce',
+    narrative: 'Anthropic Claude 3.5 Sonnet acts as the frontier cognitive partner. With its massive 200,000 token context window, Claude can ingest entire enterprise metadata catalogs, ERDs, and Apex classes simultaneously to audit architecture and synthesize governor-compliant code. Multimodal vision parses complex physical bills of lading and clinical charts directly into SObjects.',
+    keyTakeaway: 'Frontier models bring deep multi-modal reasoning and whole-org architectural comprehension.'
+  },
+  {
+    step: 7,
+    title: 'The Connective Fabric: Dual-Plane Hosted MCP',
+    subtitle: 'Model Context Protocol: Plane 1 (Context) vs Plane 2 (Action)',
+    buildingId: 'b_mcp_context',
+    districtId: 'mcp',
+    narrative: 'Salesforce exposes its enterprise capabilities to AI agents via Anthropic’s Model Context Protocol across two strictly decoupled planes: Plane 1 (data360) is the System of Context (read-only queries), while Plane 2 (headless-360) is the System of Action (governed state mutations). Separating Context and Action is an enterprise security imperative to prevent privilege escalation.',
+    keyTakeaway: 'Dual-plane isolation guarantees least privilege while empowering autonomous agentic workflows.'
+  }
+];
+
+class GuidedTour {
+  constructor(container, isoCanvas, onOpenConcept) {
+    this.container = container;
+    this.isoCanvas = isoCanvas;
+    this.onOpenConcept = onOpenConcept;
+    this.currentIndex = 0;
+    this.isActive = false;
+  }
+
+  start(stepIndex = 0) {
+    this.isActive = true;
+    this.currentIndex = stepIndex;
+    this.container.classList.remove('hidden');
+    this.goToStop(this.currentIndex);
+    sfx.openModal();
+  }
+
+  stop() {
+    this.isActive = false;
+    this.container.classList.add('hidden');
+    this.isoCanvas.activeFilter = 'all';
+    this.isoCanvas.centerCamera();
+    sfx.closeModal();
+  }
+
+  next() {
+    if (this.currentIndex < TOUR_STOPS.length - 1) {
+      this.goToStop(this.currentIndex + 1);
+    } else {
+      this.stop();
+    }
+  }
+
+  prev() {
+    if (this.currentIndex > 0) {
+      this.goToStop(this.currentIndex - 1);
+    }
+  }
+
+  goToStop(index) {
+    this.currentIndex = index;
+    const stop = TOUR_STOPS[this.currentIndex];
+
+    // Filter canvas and focus building
+    this.isoCanvas.activeFilter = stop.districtId;
+    this.isoCanvas.focusBuilding(stop.buildingId);
+    sfx.simulationStep();
+
+    this.render();
+  }
+
+  render() {
+    const stop = TOUR_STOPS[this.currentIndex];
+    const total = TOUR_STOPS.length;
+
+    this.container.innerHTML = `
+      <div style="position: absolute; bottom: 76px; left: 50%; transform: translateX(-50%); z-index: 45; width: 92%; max-width: 720px; background: rgba(9, 14, 26, 0.96); backdrop-filter: blur(28px); border: 1px solid rgba(0, 240, 255, 0.4); border-radius: 12px; box-shadow: 0 24px 60px rgba(0, 0, 0, 0.85), 0 0 35px rgba(0, 240, 255, 0.2); overflow: hidden; animation: tour-slide-up 0.25s cubic-bezier(0.16, 1, 0.3, 1);">
+        
+        <!-- Header Bar -->
+        <div style="padding: 12px 20px; border-bottom: 1px solid rgba(255, 255, 255, 0.08); background: rgba(5, 8, 16, 0.7); display: flex; align-items: center; justify-content: space-between;">
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <span class="datum-tag" style="border-color: #00f0ff; color: #00f0ff;">
+              CHAPTER ${stop.step} OF ${total}
+            </span>
+            <span style="font-size: 11px; color: #94a3b8; font-family: 'JetBrains Mono', monospace;">ARCHITECTURAL TOUR</span>
+          </div>
+          <button id="btn-exit-tour" class="action-btn-ghost" style="padding: 3px 8px; font-size: 11.5px;">
+            ✕ Exit Tour
+          </button>
+        </div>
+
+        <!-- Narrative Body -->
+        <div style="padding: 18px 22px; display: flex; flex-direction: column; gap: 10px;">
+          <div>
+            <h2 style="margin: 0 0 4px; font-size: 15px; font-weight: 700; color: #ffffff;">${stop.title}</h2>
+            <div style="font-size: 11.5px; color: #38bdf8; font-family: 'JetBrains Mono', monospace;">${stop.subtitle}</div>
+          </div>
+
+          <p style="margin: 0; color: #cbd5e1; font-size: 12.5px; line-height: 1.6;">${stop.narrative}</p>
+
+          <div style="padding: 10px 14px; border-radius: 8px; background: rgba(0, 240, 255, 0.06); border-left: 3px solid #00f0ff; font-size: 11.5px; color: #f1f5f9;">
+            <strong style="color: #00f0ff;">Architectural Key:</strong> ${stop.keyTakeaway}
+          </div>
+        </div>
+
+        <!-- Progress Dots & Controls -->
+        <div style="padding: 12px 20px; border-top: 1px solid rgba(255, 255, 255, 0.08); background: rgba(5, 8, 16, 0.85); display: flex; align-items: center; justify-content: space-between;">
+          <!-- Progress Dots -->
+          <div style="display: flex; align-items: center; gap: 6px;">
+            ${TOUR_STOPS.map((s, idx) => `
+              <div style="width: ${idx === this.currentIndex ? '20px' : '6px'}; height: 6px; border-radius: 3px; background: ${idx === this.currentIndex ? '#00f0ff' : 'rgba(255, 255, 255, 0.2)'}; transition: all 0.2s;"></div>
+            `).join('')}
+          </div>
+
+          <!-- Buttons -->
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <button id="btn-tour-prev" class="action-btn-ghost" style="padding: 6px 12px; font-size: 11.5px;" ${this.currentIndex === 0 ? 'disabled style="opacity: 0.3;"' : ''}>
+              ← Previous
+            </button>
+            <button id="btn-tour-next" class="action-btn-primary" style="padding: 6px 16px; font-size: 11.5px;">
+              ${this.currentIndex === total - 1 ? 'Finish Tour ✓' : 'Next Chapter →'}
+            </button>
+          </div>
+        </div>
+
+      </div>
+    `;
+
+    this.container.querySelector('#btn-exit-tour').onclick = () => this.stop();
+    this.container.querySelector('#btn-tour-prev').onclick = () => this.prev();
+    this.container.querySelector('#btn-tour-next').onclick = () => this.next();
+  }
+}
+
+  
+
+const RESCUE_STAGES = [
+  {
+    step: 1,
+    title: 'Stage 1: IoT Telemetry Ingestion',
+    action: 'Sensor Telemetry Ingestion (IoT)',
+    buildingId: 'b_data_lake',
+    targetBuildingId: 'b_data_refinery',
+    conduitColor: '#06b6d4',
+    detail: 'Cold-chain IoT sensor DC-HYD-04 records 9.2°C excursion (Threshold: 8.0°C) for biologic consignment SH-88392 in transit corridor Jubilee Hills.',
+    payload: {
+      source: "INDRA_IoT_Gateway",
+      timestamp: "2026-09-03T11:25:00Z",
+      device_id: "DC-HYD-04",
+      shipment_id: "SH-88392",
+      metric: "internal_temp_celsius",
+      value: 9.2,
+      threshold: 8.0,
+      excursion_severity: "CRITICAL",
+      telemetry_payload_dlo: "IoT_Telemetry_Stream__dlo"
+    }
+  },
+  {
+    step: 2,
+    title: 'Stage 2: Semantic Identity Resolution',
+    action: 'Identity Resolution & Golden Record Linkage',
+    buildingId: 'b_data_refinery',
+    targetBuildingId: 'b_platform_events',
+    conduitColor: '#06b6d4',
+    detail: 'Data Cloud maps raw DLO into UnifiedIndividual__dlm via deterministic email and phone rule. Consignee identified as Dr. Meera Reddy (VIP Patient Household UID-88291).',
+    payload: {
+      data_cloud_dmo: "UnifiedIndividual__dlm",
+      golden_record_id: "UID-88291",
+      individual: {
+        name: "Dr. Meera Reddy",
+        phone_hash: "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        household_tier: "VIP_CRITICAL_CARE",
+        lifetime_care_score: 94.8
+      },
+      calculated_insights: {
+        care_risk_score: 88.4,
+        sla_violation_probability: 0.942
+      }
+    }
+  },
+  {
+    step: 3,
+    title: 'Stage 3: Kafka Event Bus Broadcast',
+    action: 'Platform Event Broadcast',
+    buildingId: 'b_platform_events',
+    targetBuildingId: 'b_agentforce_core',
+    conduitColor: '#f59e0b',
+    detail: 'INDRA_Care_Signal__e published to Salesforce asynchronous event bus with High Volume Kafka streaming. Atlas Reasoning Engine consumes event in 18ms.',
+    payload: {
+      event_type: "INDRA_Care_Signal__e",
+      replay_id: 8829104,
+      payload: {
+        Consignment_Number__c: "SH-88392",
+        Excursion_Delta__c: 1.2,
+        Risk_Level__c: "P0",
+        Unified_Customer_Id__c: "UID-88291"
+      },
+      headers: {
+        schema_fingerprint: "apex:PlatformEvent:INDRA_Care_Signal:v1",
+        created_date: "2026-09-03T11:25:01Z"
+      }
+    }
+  },
+  {
+    step: 4,
+    title: 'Stage 4: Agentforce Atlas Reasoning Loop',
+    action: 'Autonomous Atlas Reasoning & Grounding',
+    buildingId: 'b_agentforce_core',
+    targetBuildingId: 'b_mcp_action',
+    conduitColor: '#a855f7',
+    detail: 'Atlas Engine screens payload through Einstein Trust Layer (masking PII), matches Topic ColdChain_Rescue (confidence 0.992), grounds in GHMC flood SOP vector, and plans Invocable Apex action.',
+    payload: {
+      atlas_reasoning_trace: {
+        trust_layer: {
+          pii_masked: true,
+          toxicity_score: 0.001,
+          harm_check: "PASSED"
+        },
+        topic_matching: {
+          matched_topic: "ColdChain_Rescue",
+          confidence: 0.992
+        },
+        grounding: {
+          vector_index: "SOP_ColdChain_Contingency__dlm",
+          matched_section: "Protocol 4B: Hyderabad Monsoonal Excursions"
+        },
+        synthesized_action_plan: [
+          "INVOKE: headless360_dispatch(create_case)",
+          "DISPATCH: drone_rescue_unit(Depot_04)",
+          "NOTIFY_HXL: slack_block_kit(Operations_Concierge)"
+        ]
+      }
+    }
+  },
+  {
+    step: 5,
+    title: 'Stage 5: Headless 360 MCP Tool Dispatch',
+    action: 'Plane 2 Governed Action Execution',
+    buildingId: 'b_mcp_action',
+    targetBuildingId: 'b_headless_gateway',
+    conduitColor: '#ec4899',
+    detail: 'MCP Server invokes headless360_dispatch tool executing WITH USER_MODE. Creates P0 Care Case CASE-99120 and reserves backup cryogenic payload at EV Depot.',
+    payload: {
+      jsonrpc: "2.0",
+      method: "tools/call",
+      params: {
+        name: "headless360_dispatch",
+        arguments: {
+          action: "create_case_and_reserve",
+          record_type: "Cold_Chain_Emergency",
+          fields: {
+            Subject: "Urgent P0 Excursion - Dr. Meera Reddy Consignment",
+            Priority: "Critical",
+            Consignment__c: "SH-88392",
+            Customer_Golden_Id__c: "UID-88291"
+          }
+        }
+      },
+      response: {
+        status: "SUCCESS",
+        case_id: "5008800000XyZ1A",
+        case_number: "CASE-99120",
+        fls_enforced: true,
+        execution_time_ms: 38
+      }
+    }
+  },
+  {
+    step: 6,
+    title: 'Stage 6: Headless Experience Layer (Slack HXL)',
+    action: 'Slack Concierge Interactive Dispatch',
+    buildingId: 'b_headless_gateway',
+    targetBuildingId: 'b_headless_gateway',
+    conduitColor: '#10b981',
+    detail: 'Headless 360 broadcasts interactive Slack Block Kit card to operations concierge Ananya Rao with 1-click rescue drone authorization. Mission dispatched in under 4 seconds.',
+    payload: {
+      hxl_surface: "Slack_Concierge_App",
+      channel: "#indra-coldchain-ops",
+      block_kit: [
+        {
+          type: "header",
+          text: "🚨 P0 COLD-CHAIN RESCUE REQUIRED"
+        },
+        {
+          type: "section",
+          fields: [
+            "Consignee: Dr. Meera Reddy (VIP)",
+            "Excursion: 9.2°C (+1.2°C)",
+            "Case: CASE-99120",
+            "SLA Remaining: 14 Mins"
+          ]
+        },
+        {
+          type: "actions",
+          elements: [
+            {
+              type: "button",
+              style: "primary",
+              text: "⚡ Authorize Autonomous EV Drone"
+            }
+          ]
+        }
+      ]
+    }
+  }
+];
+
+class SimulationController {
+  constructor(container, isoCanvas, particleSystem) {
+    this.container = container;
+    this.isoCanvas = isoCanvas;
+    this.particleSystem = particleSystem;
+    this.currentStep = 0;
+    this.isPlaying = false;
+    this.timer = null;
+    this.isPayloadOpen = false;
+  }
+
+  start() {
+    this.container.classList.remove('hidden');
+    this.currentStep = 0;
+    this.isPlaying = true;
+    this.executeStep(0);
+    this.scheduleNext();
+    sfx.openModal();
+  }
+
+  stop() {
+    this.isPlaying = false;
+    if (this.timer) clearTimeout(this.timer);
+    this.container.classList.add('hidden');
+    sfx.closeModal();
+  }
+
+  togglePlay() {
+    if (this.isPlaying) {
+      this.pause();
+    } else {
+      this.play();
+    }
+  }
+
+  play() {
+    this.isPlaying = true;
+    sfx.click();
+    this.scheduleNext();
+    this.render();
+  }
+
+  pause() {
+    this.isPlaying = false;
+    if (this.timer) clearTimeout(this.timer);
+    sfx.click();
+    this.render();
+  }
+
+  next() {
+    if (this.currentStep < RESCUE_STAGES.length - 1) {
+      this.jumpToStep(this.currentStep + 1);
+    }
+  }
+
+  prev() {
+    if (this.currentStep > 0) {
+      this.jumpToStep(this.currentStep - 1);
+    }
+  }
+
+  reset() {
+    this.jumpToStep(0);
+  }
+
+  jumpToStep(index) {
+    if (this.timer) clearTimeout(this.timer);
+    this.currentStep = index;
+    this.executeStep(index);
+    if (this.isPlaying) {
+      this.scheduleNext();
+    } else {
+      this.render();
+    }
+  }
+
+  scheduleNext() {
+    if (this.timer) clearTimeout(this.timer);
+    this.timer = setTimeout(() => {
+      if (this.isPlaying) {
+        if (this.currentStep < RESCUE_STAGES.length - 1) {
+          this.jumpToStep(this.currentStep + 1);
+        } else {
+          this.pause();
+        }
+      }
+    }, 3800);
+  }
+
+  executeStep(index) {
+    const stage = RESCUE_STAGES[index];
+    if (!stage) return;
+
+    // Focus camera on source building
+    this.isoCanvas.focusBuilding(stage.buildingId);
+    sfx.pulse();
+
+    // Spawn animated data packets along conduit
+    const b1 = this.isoCanvas.buildings.find(b => b.id === stage.buildingId);
+    const b2 = this.isoCanvas.buildings.find(b => b.id === stage.targetBuildingId);
+    if (b1 && b2) {
+      this.particleSystem.spawnPacket(b1, b2, stage.conduitColor, 0.025);
+    }
+
+    this.render();
+  }
+
+  render() {
+    const stage = RESCUE_STAGES[this.currentStep];
+    const total = RESCUE_STAGES.length;
+
+    this.container.innerHTML = `
+      <div style="position: absolute; top: 88px; left: 50%; transform: translateX(-50%); z-index: 45; width: 94%; max-width: 860px; background: rgba(8, 12, 22, 0.96); backdrop-filter: blur(28px); border: 1px solid rgba(16, 185, 129, 0.45); border-radius: 12px; box-shadow: 0 24px 60px rgba(0, 0, 0, 0.85), 0 0 35px rgba(16, 185, 129, 0.2); overflow: hidden; animation: sim-fade 0.2s ease;">
+        
+        <!-- Top Operational Stage Bar -->
+        <div style="padding: 12px 18px; border-bottom: 1px solid rgba(255, 255, 255, 0.08); background: rgba(5, 8, 16, 0.7); display: flex; align-items: center; justify-content: space-between;">
+          <div style="display: flex; align-items: center; gap: 12px;">
+            <span class="datum-tag" style="border-color: #10b981; color: #10b981;">
+              STAGE ${stage.step} OF ${total}
+            </span>
+            <span style="font-size: 13px; font-weight: 700; color: #ffffff;">${stage.title}</span>
+          </div>
+
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <button id="btn-toggle-payload" class="action-btn-primary" style="padding: 4px 10px; font-size: 11px;">
+              ${this.isPayloadOpen ? 'Hide Payload' : 'Inspect JSON Payload 📄'}
+            </button>
+            <button id="btn-close-sim" class="action-btn-ghost" style="padding: 4px 8px; font-size: 12px;">
+              ✕ Close
+            </button>
+          </div>
+        </div>
+
+        <!-- Interactive Stage Breadcrumb Tabs -->
+        <div style="display: flex; border-bottom: 1px solid rgba(255, 255, 255, 0.06); background: rgba(5, 8, 16, 0.5); overflow-x: auto;">
+          ${RESCUE_STAGES.map((s, idx) => {
+            const isActive = idx === this.currentStep;
+            return `
+              <button class="stage-tab-btn" data-step="${idx}" style="flex: 1; padding: 8px 10px; font-size: 11px; font-family: 'JetBrains Mono', monospace; font-weight: 600; border: none; border-bottom: 2px solid ${isActive ? '#10b981' : 'transparent'}; background: ${isActive ? 'rgba(16, 185, 129, 0.12)' : 'transparent'}; color: ${isActive ? '#10b981' : '#94a3b8'}; cursor: pointer; transition: all 0.15s; white-space: nowrap;">
+                ${s.step}. ${s.action.split(' ')[0]}
+              </button>
+            `;
+          }).join('')}
+        </div>
+
+        <!-- Stage Narrative Detail -->
+        <div style="padding: 16px 20px; display: flex; flex-direction: column; gap: 10px;">
+          <p style="margin: 0; font-size: 13px; color: #f1f5f9; line-height: 1.5;">${stage.detail}</p>
+
+          <!-- Collapsible Payload Inspector -->
+          ${this.isPayloadOpen ? `
+            <div style="margin-top: 6px; padding: 14px; background: #050811; border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 8px;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                <span style="font-size: 11px; font-family: 'JetBrains Mono', monospace; color: #10b981; font-weight: 700;">LIVE TELEMETRY / PROTOCOL PAYLOAD</span>
+                <span class="datum-tag">JSON-RPC / REST GRAPHQL</span>
+              </div>
+              <pre style="margin: 0; max-height: 180px; overflow-y: auto; font-size: 11px; color: #6ee7b7; font-family: 'JetBrains Mono', monospace;"><code>${JSON.stringify(stage.payload, null, 2)}</code></pre>
+            </div>
+          ` : ''}
+        </div>
+
+        <!-- Bottom Playback Controls Bar -->
+        <div style="padding: 10px 18px; border-top: 1px solid rgba(255, 255, 255, 0.08); background: rgba(5, 8, 16, 0.85); display: flex; align-items: center; justify-content: space-between;">
+          <div style="display: flex; align-items: center; gap: 6px;">
+            <button id="btn-sim-reset" class="action-btn-ghost" title="Reset (0)" style="padding: 5px 10px; font-size: 11.5px;">
+              ⟲ Reset
+            </button>
+            <button id="btn-sim-prev" class="action-btn-ghost" title="Previous Step" style="padding: 5px 10px; font-size: 11.5px;" ${this.currentStep === 0 ? 'disabled style="opacity: 0.3;"' : ''}>
+              ◀ Back
+            </button>
+            <button id="btn-sim-play" class="action-btn-primary" style="padding: 5px 14px; font-size: 11.5px; background: #059669;">
+              ${this.isPlaying ? '❚❚ Pause' : '▶ Play'}
+            </button>
+            <button id="btn-sim-next" class="action-btn-ghost" title="Next Step" style="padding: 5px 10px; font-size: 11.5px;" ${this.currentStep === total - 1 ? 'disabled style="opacity: 0.3;"' : ''}>
+              Forward ▶
+            </button>
+          </div>
+
+          <div style="font-size: 11px; color: #64748b; font-family: 'JetBrains Mono', monospace;">
+            SPACEBAR: PLAY/PAUSE • CLICK STAGES TO SCRUB
+          </div>
+        </div>
+
+      </div>
+    `;
+
+    this.container.querySelector('#btn-close-sim').onclick = () => this.stop();
+    this.container.querySelector('#btn-sim-play').onclick = () => this.togglePlay();
+    this.container.querySelector('#btn-sim-next').onclick = () => this.next();
+    this.container.querySelector('#btn-sim-prev').onclick = () => this.prev();
+    this.container.querySelector('#btn-sim-reset').onclick = () => this.reset();
+
+    const payloadBtn = this.container.querySelector('#btn-toggle-payload');
+    if (payloadBtn) {
+      payloadBtn.onclick = () => {
+        this.isPayloadOpen = !this.isPayloadOpen;
+        this.render();
+      };
+    }
+
+    this.container.querySelectorAll('.stage-tab-btn').forEach(btn => {
+      btn.onclick = () => {
+        const stepIdx = parseInt(btn.dataset.step, 10);
+        this.jumpToStep(stepIdx);
+      };
+    });
+  }
+}
+
+  
+
+
+
+
+
+
+
+
+
+document.addEventListener('DOMContentLoaded', () => {
+  const canvasEl = document.getElementById('city-canvas');
+  const inspectorContainer = document.getElementById('building-inspector');
+  const modalContainer = document.getElementById('concept-modal');
+  const paletteContainer = document.getElementById('command-palette-modal');
+  const tourContainer = document.getElementById('guided-tour-container');
+  const simContainer = document.getElementById('simulation-controller-container');
+  const shortcutsContainer = document.getElementById('shortcuts-modal');
+
+  const particleSystem = new ParticleSystem();
+  const isoCanvas = new IsometricCanvas(canvasEl, METADATA_CATALOG, particleSystem);
+
+  const inspector = new BuildingInspector(inspectorContainer, (building) => {
+    handleBuildingAction(building, isoCanvas, particleSystem);
+  });
+
+  const conceptModal = new ConceptModal(modalContainer);
+
+  const commandPalette = new CommandPalette(
+    paletteContainer,
+    METADATA_CATALOG,
+    (buildingId) => {
+      isoCanvas.focusBuilding(buildingId);
+      const b = METADATA_CATALOG.buildings.find(item => item.id === buildingId);
+      if (b) inspector.show(b);
+    },
+    (conceptId) => {
+      conceptModal.show(conceptId);
+    }
+  );
+
+  const guidedTour = new GuidedTour(tourContainer, isoCanvas, (conceptId) => {
+    conceptModal.show(conceptId);
+  });
+
+  const simController = new SimulationController(simContainer, isoCanvas, particleSystem);
+
+  // Hook building selection on canvas click
+  isoCanvas.onBuildingSelected = (building) => {
+    inspector.show(building);
+  };
+
+  // Wire up Program / Layer Filter segmented buttons
+  document.querySelectorAll('.filter-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+
+      const filter = btn.dataset.filter;
+      isoCanvas.activeFilter = filter;
+      sfx.districtSelect();
+    });
+  });
+
+  // Top Action Buttons
+  document.getElementById('btn-open-search').addEventListener('click', () => {
+    commandPalette.open();
+  });
+
+  document.getElementById('btn-start-tour').addEventListener('click', () => {
+    guidedTour.start(0);
+  });
+
+  document.getElementById('btn-open-academy').addEventListener('click', () => {
+    conceptModal.show('headless360');
+  });
+
+  document.getElementById('btn-run-simulation').addEventListener('click', () => {
+    simController.start();
+  });
+
+  const calloutBtn = document.getElementById('btn-toggle-callouts');
+  if (calloutBtn) {
+    calloutBtn.addEventListener('click', () => {
+      isoCanvas.showCallouts = !isoCanvas.showCallouts;
+      calloutBtn.style.color = isoCanvas.showCallouts ? '#38bdf8' : '#64748b';
+      sfx.click();
+    });
+  }
+
+  document.getElementById('btn-shortcuts').addEventListener('click', () => {
+    toggleShortcutsModal(shortcutsContainer);
+  });
+
+  document.getElementById('btn-toggle-sound').addEventListener('click', (e) => {
+    const isMuted = sfx.toggleMute();
+    e.target.innerHTML = isMuted ? '🔇' : '🔊';
+  });
+
+  document.getElementById('btn-center-camera').addEventListener('click', () => {
+    isoCanvas.centerCamera();
+    sfx.click();
+  });
+
+  // Quick Zone Jump buttons in bottom dock
+  document.querySelectorAll('.district-jump-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const targetBuildingId = btn.dataset.target;
+      isoCanvas.focusBuilding(targetBuildingId);
+      const b = METADATA_CATALOG.buildings.find(item => item.id === targetBuildingId);
+      if (b) inspector.show(b);
+    });
+  });
+
+  // District Quick Jump Map
+  const districtJumps = {
+    '1': 'b_standard_objects',
+    '2': 'b_apex_foundry',
+    '3': 'b_data_lake',
+    '4': 'b_headless_gateway',
+    '5': 'b_agentforce_core',
+    '6': 'b_claudeforce_lab',
+    '7': 'b_mcp_context'
+  };
+
+  // Global Keyboard Shortcuts
+  window.addEventListener('keydown', (e) => {
+    // Ignore input focus
+    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+
+    if (e.key === 't' || e.key === 'T') {
+      e.preventDefault();
+      if (guidedTour.isActive) {
+        guidedTour.stop();
+      } else {
+        guidedTour.start(0);
+      }
+    } else if (e.key === ' ' && !simContainer.classList.contains('hidden')) {
+      e.preventDefault();
+      simController.togglePlay();
+    } else if (e.key === '?') {
+      e.preventDefault();
+      toggleShortcutsModal(shortcutsContainer);
+    } else if (districtJumps[e.key]) {
+      const bId = districtJumps[e.key];
+      isoCanvas.focusBuilding(bId);
+      const b = METADATA_CATALOG.buildings.find(item => item.id === bId);
+      if (b) inspector.show(b);
+    } else if (e.key === 'c' || e.key === 'C') {
+      isoCanvas.centerCamera();
+    } else if (e.key === 'm' || e.key === 'M') {
+      const isMuted = sfx.toggleMute();
+      const soundBtn = document.getElementById('btn-toggle-sound');
+      if (soundBtn) soundBtn.innerHTML = isMuted ? '🔇' : '🔊';
+    } else if (e.key === 'Escape') {
+      if (guidedTour.isActive) guidedTour.stop();
+      if (!shortcutsContainer.classList.contains('hidden')) shortcutsContainer.classList.add('hidden');
+      if (!modalContainer.classList.contains('hidden')) conceptModal.hide();
+      if (!inspectorContainer.classList.contains('hidden')) inspector.hide();
+      if (!simContainer.classList.contains('hidden')) simController.stop();
+    }
+  });
+
+  // Animation Loop
+  let lastTime = performance.now();
+  function loop(currentTime) {
+    const delta = currentTime - lastTime;
+    lastTime = currentTime;
+
+    particleSystem.update(delta);
+    isoCanvas.render(currentTime);
+
+    requestAnimationFrame(loop);
+  }
+  requestAnimationFrame(loop);
+});
+
+function toggleShortcutsModal(container) {
+  if (!container.classList.contains('hidden')) {
+    container.classList.add('hidden');
+    sfx.closeModal();
+    return;
+  }
+
+  container.classList.remove('hidden');
+  sfx.openModal();
+
+  container.innerHTML = `
+    <div class="modal-overlay">
+      <div class="modal-window" style="max-width: 580px; height: auto;">
+        <div style="padding: 16px 20px; border-bottom: 1px solid rgba(255, 255, 255, 0.08); background: rgba(8, 12, 22, 0.9); display: flex; align-items: center; justify-content: space-between;">
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <span style="font-size: 18px;">⌨️</span>
+            <span style="font-size: 14px; font-weight: 700; color: #ffffff;">Keyboard Shortcuts & Navigation</span>
+          </div>
+          <button id="btn-close-shortcuts" class="action-btn-ghost" style="padding: 4px 8px; font-size: 12px;">✕</button>
+        </div>
+
+        <div style="padding: 20px; display: flex; flex-direction: column; gap: 12px; font-size: 12.5px;">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <span style="color: #cbd5e1;">Universal Search & Command Palette</span>
+            <span class="datum-tag" style="color: #00f0ff; border-color: #00f0ff;">⌘K / Ctrl+K</span>
+          </div>
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <span style="color: #cbd5e1;">Start / Stop Guided Architectural Tour</span>
+            <span class="datum-tag" style="color: #38bdf8; border-color: #38bdf8;">T</span>
+          </div>
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <span style="color: #cbd5e1;">Play / Pause Interactive Simulation</span>
+            <span class="datum-tag" style="color: #10b981; border-color: #10b981;">Space</span>
+          </div>
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <span style="color: #cbd5e1;">Quick-Jump to Districts (1 to 7)</span>
+            <span class="datum-tag" style="color: #a855f7; border-color: #a855f7;">1 - 7</span>
+          </div>
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <span style="color: #cbd5e1;">Center Camera on Masterplan</span>
+            <span class="datum-tag" style="color: #f59e0b; border-color: #f59e0b;">C</span>
+          </div>
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <span style="color: #cbd5e1;">Toggle Procedural Audio FX</span>
+            <span class="datum-tag" style="color: #f97316; border-color: #f97316;">M</span>
+          </div>
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <span style="color: #cbd5e1;">Close Any Modal / Panel</span>
+            <span class="datum-tag">Esc</span>
+          </div>
+        </div>
+
+        <div style="padding: 12px 20px; border-top: 1px solid rgba(255, 255, 255, 0.08); background: rgba(5, 8, 16, 0.85); display: flex; justify-content: flex-end;">
+          <button id="btn-close-shortcuts-btn" class="action-btn-primary" style="padding: 6px 14px; font-size: 11.5px;">Close</button>
+        </div>
+      </div>
+    </div>
+  `;
+
+  container.querySelector('#btn-close-shortcuts').onclick = () => container.classList.add('hidden');
+  container.querySelector('#btn-close-shortcuts-btn').onclick = () => container.classList.add('hidden');
+  container.querySelector('.modal-overlay').onclick = (e) => {
+    if (e.target.classList.contains('modal-overlay')) container.classList.add('hidden');
+  };
+}
+
+function handleBuildingAction(building, isoCanvas, particleSystem) {
+  sfx.simulationStep();
+  const consoleEl = document.getElementById('action-console-log');
+  if (!consoleEl) return;
+
+  consoleEl.innerHTML = `<div style="color: #38bdf8; font-family: 'JetBrains Mono', monospace; font-weight: 700;">⚡ DISPATCHING CIRCULATION FROM ${building.name.toUpperCase()}...</div>`;
+
+  if (building.relationships && building.relationships.length > 0) {
+    building.relationships.forEach((relId, idx) => {
+      const targetB = isoCanvas.buildings.find(b => b.id === relId);
+      if (targetB) {
+        setTimeout(() => {
+          particleSystem.spawnPacket(building, targetB, building.color || '#38bdf8', 0.025);
+          sfx.pulse();
+          consoleEl.innerHTML += `
+            <div style="color: #cbd5e1; font-family: 'JetBrains Mono', monospace;">→ Vector routed to <strong style="color: #10b981;">${targetB.name}</strong></div>
+          `;
+        }, idx * 240);
+      }
+    });
+
+    setTimeout(() => {
+      consoleEl.innerHTML += `<div style="color: #10b981; font-family: 'JetBrains Mono', monospace; font-weight: 700; margin-top: 4px;">✓ CIRCULATION SYNCHRONIZED ACROSS ARCHITECTURAL FABRIC!</div>`;
+    }, building.relationships.length * 240 + 100);
+  } else {
+    consoleEl.innerHTML += `<div style="color: #94a3b8; font-family: 'JetBrains Mono', monospace;">No outbound conduits configured for node.</div>`;
+  }
+}
+
+})();
+
+  </script>
+</body>
+</html>

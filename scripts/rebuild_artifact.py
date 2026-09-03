@@ -1,0 +1,185 @@
+import os
+import re
+
+base_dir = '/Users/asmgkr/.gemini/antigravity/scratch/salesforce-city-visualizer'
+artifact_path = '/Users/asmgkr/.gemini/antigravity/brain/70c5c001-c5d6-45ac-acd0-3a33f17eabe3/salesforce_pixel_city.html'
+
+def read_file(rel_path):
+    with open(os.path.join(base_dir, rel_path), 'r') as f:
+        return f.read()
+
+# Read CSS
+css_content = read_file('src/styles/pixel-city.css')
+
+# Read JS modules and strip imports/exports
+def clean_js(content):
+    content = re.sub(r'import\s+.*?from\s+[\'"].*?[\'"];?', '', content)
+    content = re.sub(r'export\s+(const|let|var|function|class)\s+', r'\1 ', content)
+    content = re.sub(r'export\s*\{[^}]*\};?', '', content)
+    return content
+
+js_metadata = clean_js(read_file('src/data/metadataCatalog.js'))
+js_layout = clean_js(read_file('src/data/cityLayout.js'))
+js_guides = clean_js(read_file('src/data/conceptGuides.js'))
+js_sound = clean_js(read_file('src/engine/SoundFx.js'))
+js_particles = clean_js(read_file('src/engine/ParticleSystem.js'))
+js_canvas = clean_js(read_file('src/engine/IsometricCanvas.js'))
+js_inspector = clean_js(read_file('src/components/BuildingInspector.js'))
+js_modal = clean_js(read_file('src/components/ConceptModal.js'))
+js_palette = clean_js(read_file('src/components/CommandPalette.js'))
+js_tour = clean_js(read_file('src/components/GuidedTour.js'))
+js_sim = clean_js(read_file('src/components/SimulationController.js'))
+js_main = clean_js(read_file('src/main.js'))
+
+combined_js = f"""
+(function() {{
+  {js_sound}
+  {js_layout}
+  {js_metadata}
+  {js_guides}
+  {js_particles}
+  {js_canvas}
+  {js_inspector}
+  {js_modal}
+  {js_palette}
+  {js_tour}
+  {js_sim}
+  {js_main}
+}})();
+"""
+
+standalone_html = f"""<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Salesforce Org Axonometric Masterplan // Architectural Visualizer</title>
+  <style>
+    {css_content}
+  </style>
+</head>
+<body>
+
+  <!-- Fullscreen Axonometric Drafting Canvas -->
+  <canvas id="city-canvas"></canvas>
+
+  <!-- Architectural Drafting Grid Overlay -->
+  <div class="drafting-grid"></div>
+
+  <!-- Vellum Edge Vignette -->
+  <div class="vellum-vignette"></div>
+
+  <!-- Top Architectural Navigation Bar -->
+  <header class="arch-header">
+    <!-- Brand & Masterplan Identification -->
+    <div class="arch-brand">
+      <div class="arch-logo">SF</div>
+      <div>
+        <div class="arch-title">
+          <span>SALESFORCE ORG MASTERPLAN</span>
+          <span class="datum-tag" style="border-color: rgba(0, 240, 255, 0.4); color: #00f0ff;">AXONOMETRIC v66.0</span>
+        </div>
+        <div class="arch-subtitle">METADATA, SEMANTIC GRAPH & COGNITIVE FABRIC</div>
+      </div>
+    </div>
+
+    <!-- Quick Search Command Button -->
+    <button id="btn-open-search" class="action-btn-ghost" style="border: 1px solid rgba(255, 255, 255, 0.12); padding: 5px 12px; gap: 8px;" title="Universal Search (⌘K)">
+      <span>🔍</span>
+      <span style="font-size: 11.5px; color: #cbd5e1;">Search...</span>
+      <span class="datum-tag" style="font-size: 9px;">⌘K</span>
+    </button>
+
+    <!-- Architectural Zoning / District Filter -->
+    <div class="program-selector">
+      <button data-filter="all" class="filter-btn program-btn active">Masterplan (All)</button>
+      <button data-filter="metadata" class="filter-btn program-btn">1. Metadata</button>
+      <button data-filter="automation" class="filter-btn program-btn">2. Logic Grid</button>
+      <button data-filter="semantic" class="filter-btn program-btn">3. Semantic Lake</button>
+      <button data-filter="headless" class="filter-btn program-btn">4. Headless 360</button>
+      <button data-filter="agentforce" class="filter-btn program-btn">5. Agentforce</button>
+      <button data-filter="claudeforce" class="filter-btn program-btn">6. Claudeforce</button>
+      <button data-filter="mcp" class="filter-btn program-btn">7. Dual MCPs</button>
+    </div>
+
+    <!-- Architectural Controls & Studio -->
+    <div style="display: flex; align-items: center; gap: 8px;">
+      <button id="btn-start-tour" class="action-btn-primary" style="background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%); border-color: rgba(56, 189, 248, 0.4);" title="Start Guided Architectural Tour (T)">
+        <span>🧭</span>
+        <span>Guided Tour</span>
+      </button>
+
+      <button id="btn-open-academy" class="action-btn-primary" style="background: linear-gradient(135deg, #4f46e5 0%, #3730a3 100%); border-color: rgba(99, 102, 241, 0.4);">
+        <span>🏛️</span>
+        <span>Concept Studio</span>
+      </button>
+
+      <button id="btn-run-simulation" class="action-btn-primary" style="background: linear-gradient(135deg, #059669 0%, #065f46 100%); border-color: rgba(16, 185, 129, 0.4);">
+        <span>⚡</span>
+        <span>Interactive Scenario</span>
+      </button>
+
+      <button id="btn-toggle-callouts" class="action-btn-ghost" title="Toggle Architectural Callouts">
+        📐 Callouts
+      </button>
+
+      <button id="btn-shortcuts" class="action-btn-ghost" title="Keyboard Shortcuts (?)">
+        ⌨️
+      </button>
+
+      <button id="btn-toggle-sound" class="action-btn-ghost">
+        🔊
+      </button>
+
+      <button id="btn-center-camera" class="action-btn-ghost" title="Center View (C)">
+        🎯
+      </button>
+    </div>
+  </header>
+
+  <!-- Interactive Simulation Controller Container -->
+  <div id="simulation-controller-container" class="hidden"></div>
+
+  <!-- Guided Tour Container -->
+  <div id="guided-tour-container" class="hidden"></div>
+
+  <!-- Command Palette Modal -->
+  <div id="command-palette-modal" class="hidden"></div>
+
+  <!-- Slide-Over Architectural Dossier -->
+  <aside id="building-inspector" class="hidden"></aside>
+
+  <!-- Bottom Architectural Dock & Scale -->
+  <footer class="arch-dock">
+    <div style="display: flex; align-items: center; gap: 6px; overflow-x: auto;">
+      <span style="font-size: 10px; color: #64748b; font-family: 'JetBrains Mono', monospace; text-transform: uppercase; margin-right: 6px;">ZONE SELECT:</span>
+      <button data-target="b_standard_objects" class="district-jump-btn program-btn" style="color: #38bdf8;">1. Metadata Citadel</button>
+      <button data-target="b_apex_foundry" class="district-jump-btn program-btn" style="color: #f59e0b;">2. Logic Grid</button>
+      <button data-target="b_data_lake" class="district-jump-btn program-btn" style="color: #06b6d4;">3. Semantic Lake</button>
+      <button data-target="b_headless_gateway" class="district-jump-btn program-btn" style="color: #10b981;">4. Headless 360</button>
+      <button data-target="b_agentforce_core" class="district-jump-btn program-btn" style="color: #a855f7;">5. Agentforce Spire</button>
+      <button data-target="b_claudeforce_lab" class="district-jump-btn program-btn" style="color: #f97316;">6. Claudeforce Lab</button>
+      <button data-target="b_mcp_context" class="district-jump-btn program-btn" style="color: #ec4899;">7. Dual MCPs</button>
+    </div>
+    <div style="display: flex; align-items: center; gap: 14px; font-size: 11px; color: #64748b; font-family: 'JetBrains Mono', monospace;">
+      <span>PRESS <strong>⌘K</strong> TO SEARCH</span> • <span>PRESS <strong>T</strong> FOR TOUR</span> • <span>PRESS <strong>SPACE</strong> FOR SCENARIO</span>
+    </div>
+  </footer>
+
+  <!-- Architectural Concept Studio Modal -->
+  <div id="concept-modal" class="hidden"></div>
+
+  <!-- Keyboard Shortcuts Cheatsheet Modal -->
+  <div id="shortcuts-modal" class="hidden"></div>
+
+  <script>
+    {combined_js}
+  </script>
+</body>
+</html>
+"""
+
+with open(artifact_path, 'w') as f:
+    f.write(standalone_html)
+
+print("Rebuilt salesforce_pixel_city.html with all UX modules successfully!")

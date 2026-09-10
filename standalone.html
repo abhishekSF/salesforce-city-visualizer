@@ -2,10 +2,10 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Salesforce Org Axonometric Masterplan // Architectural Visualizer</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Salesforce World // Exploration RPG & Architecture Atlas</title>
   <style>
-    /* ==========================================================================
+/* ==========================================================================
    Salesforce Architecture Axonometric Masterplan - Architectural Drafting UI
    Swiss International Style / Modern Architectural Axonometric Aesthetic
    ========================================================================== */
@@ -443,86 +443,257 @@ code {
   background: rgba(56, 189, 248, 0.08);
 }
 
-  </style>
+/* ==========================================================================
+   RPG World & Dual-Layer Mode Styling
+   ========================================================================== */
+
+@keyframes toast-drop {
+  from { transform: translate(-50%, -30px); opacity: 0; }
+  to { transform: translate(-50%, 0); opacity: 1; }
+}
+
+/* View Mode Segmented Switcher */
+.view-mode-segmented {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  background: rgba(8, 12, 22, 0.9);
+  padding: 3px;
+  border-radius: 8px;
+  border: 1px solid var(--ui-border);
+}
+
+.view-mode-btn {
+  padding: 6px 14px;
+  border-radius: 6px;
+  font-size: 11.5px;
+  font-weight: 700;
+  color: var(--text-secondary);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  font-family: var(--font-sans);
+  white-space: nowrap;
+}
+
+.view-mode-btn.active {
+  color: #ffffff;
+  background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+  border: 1px solid rgba(56, 189, 248, 0.4);
+  box-shadow: 0 0 12px rgba(2, 132, 199, 0.4);
+}
+
+/* Mobile Virtual Controls (On-Screen D-Pad & Action Button) */
+.mobile-controls {
+  display: none;
+  position: absolute;
+  bottom: 80px;
+  left: 20px;
+  right: 20px;
+  z-index: 30;
+  pointer-events: none;
+  justify-content: space-between;
+  align-items: flex-end;
+}
+
+.dpad-container {
+  pointer-events: auto;
+  display: grid;
+  grid-template-columns: repeat(3, 44px);
+  grid-template-rows: repeat(3, 44px);
+  gap: 4px;
+  background: rgba(8, 12, 22, 0.7);
+  backdrop-filter: blur(12px);
+  padding: 6px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.dpad-btn {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 8px;
+  color: #ffffff;
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: manipulation;
+}
+
+.dpad-btn:active {
+  background: rgba(56, 189, 248, 0.35);
+  border-color: #00f0ff;
+}
+
+.mobile-action-btn {
+  pointer-events: auto;
+  width: 58px;
+  height: 58px;
+  border-radius: 29px;
+  background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+  border: 2px solid #00f0ff;
+  color: #ffffff;
+  font-weight: 700;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.6), 0 0 16px rgba(0, 240, 255, 0.35);
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: manipulation;
+}
+
+.mobile-action-btn:active {
+  transform: scale(0.92);
+  box-shadow: 0 0 24px #00f0ff;
+}
+
+/* Responsive Overrides */
+@media (max-width: 900px) {
+  .program-selector {
+    display: none;
+  }
+}
+
+@media (max-width: 768px) {
+  .arch-header {
+    top: 10px;
+    left: 10px;
+    right: 10px;
+    padding: 8px 12px;
+  }
+  
+  .arch-dock {
+    bottom: 10px;
+    left: 10px;
+    right: 10px;
+    padding: 6px 12px;
+    font-size: 10px;
+  }
+
+  .mobile-controls {
+    display: flex;
+  }
+
+  #building-inspector {
+    top: 60px;
+    right: 10px;
+    bottom: 50px;
+    width: calc(100vw - 20px);
+  }
+}
+
+</style>
 </head>
 <body>
 
-  <!-- Fullscreen Axonometric Drafting Canvas -->
+  <!-- Canvas (Dual-Mode: Explore RPG World & 2.5D Isometric Masterplan) -->
   <canvas id="city-canvas"></canvas>
 
-  <!-- Architectural Drafting Grid Overlay -->
+  <!-- Architectural Drafting Grid Overlay (active in Atlas mode) -->
   <div class="drafting-grid"></div>
 
   <!-- Vellum Edge Vignette -->
   <div class="vellum-vignette"></div>
 
-  <!-- Top Architectural Navigation Bar -->
+  <!-- Top Navigation & Control Bar -->
   <header class="arch-header">
-    <!-- Brand & Masterplan Identification -->
+    <!-- Brand & Org Identification -->
     <div class="arch-brand">
       <div class="arch-logo">SF</div>
       <div>
         <div class="arch-title">
-          <span>SALESFORCE ORG MASTERPLAN</span>
-          <span class="datum-tag" style="border-color: rgba(0, 240, 255, 0.4); color: #00f0ff;">AXONOMETRIC v66.0</span>
+          <span>SALESFORCE WORLD</span>
+          <span class="datum-tag" style="border-color: rgba(0, 240, 255, 0.4); color: #00f0ff;">v66.0</span>
         </div>
-        <div class="arch-subtitle">METADATA, SEMANTIC GRAPH & COGNITIVE FABRIC</div>
+        <div class="arch-subtitle">RETRO RPG EXPLORER & ARCHITECTURE ATLAS</div>
       </div>
     </div>
 
-    <!-- Quick Search Command Button -->
-    <button id="btn-open-search" class="action-btn-ghost" style="border: 1px solid rgba(255, 255, 255, 0.12); padding: 5px 12px; gap: 8px;" title="Universal Search (⌘K)">
-      <span>🔍</span>
-      <span style="font-size: 11.5px; color: #cbd5e1;">Search...</span>
-      <span class="datum-tag" style="font-size: 9px;">⌘K</span>
-    </button>
-
-    <!-- Architectural Zoning / District Filter -->
-    <div class="program-selector">
-      <button data-filter="all" class="filter-btn program-btn active">Masterplan (All)</button>
-      <button data-filter="metadata" class="filter-btn program-btn">1. Metadata</button>
-      <button data-filter="automation" class="filter-btn program-btn">2. Logic Grid</button>
-      <button data-filter="semantic" class="filter-btn program-btn">3. Semantic Lake</button>
-      <button data-filter="headless" class="filter-btn program-btn">4. Headless 360</button>
-      <button data-filter="agentforce" class="filter-btn program-btn">5. Agentforce</button>
-      <button data-filter="claudeforce" class="filter-btn program-btn">6. Claudeforce</button>
-      <button data-filter="mcp" class="filter-btn program-btn">7. Dual MCPs</button>
+    <!-- Dual View Layer Switcher: [ 🎮 Explore ]  [ 🏛️ Atlas ] -->
+    <div class="view-mode-segmented">
+      <button id="btn-mode-explore" class="view-mode-btn active" title="Top-Down Handcrafted RPG Exploration (V)">
+        🎮 Explore (RPG)
+      </button>
+      <button id="btn-mode-atlas" class="view-mode-btn" title="2.5D Axonometric Architecture Masterplan (V)">
+        🏛️ Atlas (2.5D)
+      </button>
     </div>
 
-    <!-- Architectural Controls & Studio -->
+    <!-- Architectural Zoning / District Filter (Atlas Mode) -->
+    <div class="program-selector">
+      <button data-filter="all" class="filter-btn program-btn active">All</button>
+      <button data-filter="metadata" class="filter-btn program-btn">1. Metadata</button>
+      <button data-filter="automation" class="filter-btn program-btn">2. Automation</button>
+      <button data-filter="semantic" class="filter-btn program-btn">3. Semantic</button>
+      <button data-filter="headless" class="filter-btn program-btn">4. Headless</button>
+      <button data-filter="agentforce" class="filter-btn program-btn">5. Agentforce</button>
+      <button data-filter="claudeforce" class="filter-btn program-btn">6. Claudeforce</button>
+      <button data-filter="mcp" class="filter-btn program-btn">7. MCP</button>
+    </div>
+
+    <!-- Action Tools -->
     <div style="display: flex; align-items: center; gap: 8px;">
-      <button id="btn-start-tour" class="action-btn-primary" style="background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%); border-color: rgba(56, 189, 248, 0.4);" title="Start Guided Architectural Tour (T)">
-        <span>🧭</span>
-        <span>Guided Tour</span>
+      <!-- Field Guide Button -->
+      <button id="btn-open-guide" class="action-btn-primary" style="background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%); border-color: rgba(56, 189, 248, 0.4);" title="Open Architectural Field Guide (G)">
+        <span>📖</span>
+        <span id="guide-badge">Guide (0/17)</span>
       </button>
 
-      <button id="btn-open-academy" class="action-btn-primary" style="background: linear-gradient(135deg, #4f46e5 0%, #3730a3 100%); border-color: rgba(99, 102, 241, 0.4);">
-        <span>🏛️</span>
-        <span>Concept Studio</span>
+      <!-- Universal Search Button -->
+      <button id="btn-open-search" class="action-btn-ghost" style="border: 1px solid rgba(255, 255, 255, 0.12); padding: 5px 12px; gap: 6px;" title="Universal Search (⌘K)">
+        <span>🔍</span>
+        <span class="datum-tag" style="font-size: 9px;">⌘K</span>
       </button>
 
-      <button id="btn-run-simulation" class="action-btn-primary" style="background: linear-gradient(135deg, #059669 0%, #065f46 100%); border-color: rgba(16, 185, 129, 0.4);">
+      <!-- Guided Tour Button -->
+      <button id="btn-start-tour" class="action-btn-ghost" title="Start Guided Tour (T)">
+        🧭 Tour
+      </button>
+
+      <!-- Concept Studio Button -->
+      <button id="btn-open-academy" class="action-btn-ghost" title="System Architecture Studio">
+        🏛️ Studio
+      </button>
+
+      <!-- Interactive Scenario Button -->
+      <button id="btn-run-simulation" class="action-btn-primary" style="background: linear-gradient(135deg, #059669 0%, #065f46 100%); border-color: rgba(16, 185, 129, 0.4);" title="Cold-Chain Emergency Scenario (Space)">
         <span>⚡</span>
-        <span>Interactive Scenario</span>
-      </button>
-
-      <button id="btn-toggle-callouts" class="action-btn-ghost" title="Toggle Architectural Callouts">
-        📐 Callouts
+        <span>Rescue Scenario</span>
       </button>
 
       <button id="btn-shortcuts" class="action-btn-ghost" title="Keyboard Shortcuts (?)">
         ⌨️
       </button>
 
-      <button id="btn-toggle-sound" class="action-btn-ghost">
+      <button id="btn-toggle-sound" class="action-btn-ghost" title="Mute Audio (M)">
         🔊
-      </button>
-
-      <button id="btn-center-camera" class="action-btn-ghost" title="Center View (C)">
-        🎯
       </button>
     </div>
   </header>
+
+  <!-- Mobile On-Screen Virtual Controls (D-Pad & Action Button) -->
+  <div class="mobile-controls">
+    <div class="dpad-container">
+      <div></div>
+      <button class="dpad-btn" id="dpad-up">▲</button>
+      <div></div>
+      <button class="dpad-btn" id="dpad-left">◀</button>
+      <div></div>
+      <button class="dpad-btn" id="dpad-right">▶</button>
+      <div></div>
+      <button class="dpad-btn" id="dpad-down">▼</button>
+      <div></div>
+    </div>
+    <button class="mobile-action-btn" id="mobile-btn-action">
+      [ E ]
+    </button>
+  </div>
 
   <!-- Interactive Simulation Controller Container -->
   <div id="simulation-controller-container" class="hidden"></div>
@@ -530,26 +701,29 @@ code {
   <!-- Guided Tour Container -->
   <div id="guided-tour-container" class="hidden"></div>
 
+  <!-- Field Guide Modal -->
+  <div id="field-guide-modal" class="hidden"></div>
+
   <!-- Command Palette Modal -->
   <div id="command-palette-modal" class="hidden"></div>
 
   <!-- Slide-Over Architectural Dossier -->
   <aside id="building-inspector" class="hidden"></aside>
 
-  <!-- Bottom Architectural Dock & Scale -->
+  <!-- Bottom Scale & Status Dock -->
   <footer class="arch-dock">
-    <div style="display: flex; align-items: center; gap: 6px; overflow-x: auto;">
-      <span style="font-size: 10px; color: #64748b; font-family: 'JetBrains Mono', monospace; text-transform: uppercase; margin-right: 6px;">ZONE SELECT:</span>
-      <button data-target="b_standard_objects" class="district-jump-btn program-btn" style="color: #38bdf8;">1. Metadata Citadel</button>
-      <button data-target="b_apex_foundry" class="district-jump-btn program-btn" style="color: #f59e0b;">2. Logic Grid</button>
-      <button data-target="b_data_lake" class="district-jump-btn program-btn" style="color: #06b6d4;">3. Semantic Lake</button>
-      <button data-target="b_headless_gateway" class="district-jump-btn program-btn" style="color: #10b981;">4. Headless 360</button>
-      <button data-target="b_agentforce_core" class="district-jump-btn program-btn" style="color: #a855f7;">5. Agentforce Spire</button>
-      <button data-target="b_claudeforce_lab" class="district-jump-btn program-btn" style="color: #f97316;">6. Claudeforce Lab</button>
+    <div style="display: flex; align-items: center; gap: 8px; overflow-x: auto;">
+      <span style="font-size: 10px; color: #64748b; font-family: 'JetBrains Mono', monospace; text-transform: uppercase;">FAST TRAVEL:</span>
+      <button data-target="b_standard_objects" class="district-jump-btn program-btn" style="color: #38bdf8;">1. Metadata</button>
+      <button data-target="b_apex_foundry" class="district-jump-btn program-btn" style="color: #f59e0b;">2. Automation</button>
+      <button data-target="b_data_lake" class="district-jump-btn program-btn" style="color: #06b6d4;">3. Semantic Harbor</button>
+      <button data-target="b_headless_gateway" class="district-jump-btn program-btn" style="color: #10b981;">4. Headless</button>
+      <button data-target="b_agentforce_core" class="district-jump-btn program-btn" style="color: #a855f7;">5. Agentforce</button>
+      <button data-target="b_claudeforce_lab" class="district-jump-btn program-btn" style="color: #f97316;">6. Claudeforce</button>
       <button data-target="b_mcp_context" class="district-jump-btn program-btn" style="color: #ec4899;">7. Dual MCPs</button>
     </div>
     <div style="display: flex; align-items: center; gap: 14px; font-size: 11px; color: #64748b; font-family: 'JetBrains Mono', monospace;">
-      <span>PRESS <strong>⌘K</strong> TO SEARCH</span> • <span>PRESS <strong>T</strong> FOR TOUR</span> • <span>PRESS <strong>SPACE</strong> FOR SCENARIO</span>
+      <span><strong>WASD / ARROWS</strong>: MOVE</span> • <span><strong>E</strong>: INTERACT</span> • <span><strong>V</strong>: TOGGLE ATLAS</span> • <span><strong>⌘K</strong>: SEARCH</span>
     </div>
   </footer>
 
@@ -559,8 +733,9 @@ code {
   <!-- Keyboard Shortcuts Cheatsheet Modal -->
   <div id="shortcuts-modal" class="hidden"></div>
 
+  <!-- Application Bootstrap -->
   <script>
-    
+
 (function() {
   /**
  * Synthesized 8-Bit Web Audio API Sound System
@@ -2798,6 +2973,1172 @@ function varAccent(districtId) {
   return '#ffffff';
 }
 
+  /**
+ * TopDownWorld.js - Handcrafted Retro RPG Town World
+ * Features 28x28 tile map, multi-biome terrain, animated water & shoreline,
+ * depth-sorted Y-ordered entities (player, trees, props, landmarks),
+ * and distinctive architectural artwork for all 17 Salesforce landmarks.
+ */
+
+
+
+const TILE_SIZE = 40;
+const WORLD_WIDTH = GRID_SIZE * TILE_SIZE; // 1120px
+const WORLD_HEIGHT = GRID_SIZE * TILE_SIZE; // 1120px
+
+class TopDownWorld {
+  constructor(catalog) {
+    this.catalog = catalog;
+    this.tileMap = generateTileMap();
+    this.buildings = [];
+    this.props = [];
+    this.trees = [];
+
+    this.initBuildings();
+    this.initEnvironmentalProps();
+  }
+
+  initBuildings() {
+    this.buildings = this.catalog.buildings.map(b => {
+      const wx = b.gridX * TILE_SIZE;
+      const wy = b.gridY * TILE_SIZE;
+      const ww = b.width * TILE_SIZE;
+      const wh = b.height * TILE_SIZE;
+
+      return {
+        ...b,
+        worldX: wx,
+        worldY: wy,
+        worldW: ww,
+        worldH: wh,
+        // Collision box (occupies lower 60% of building footprint)
+        solidX: wx + 4,
+        solidY: wy + wh * 0.35,
+        solidW: ww - 8,
+        solidH: wh * 0.65,
+        // Entrance anchor in front of building door
+        entranceX: wx + ww / 2,
+        entranceY: wy + wh + 12,
+        // Y-sort anchor for depth sorting
+        sortY: wy + wh
+      };
+    });
+  }
+
+  initEnvironmentalProps() {
+    this.props = [];
+    this.trees = [];
+
+    // Handcrafted tree locations around districts, parks, and avenues
+    const treeCoords = [
+      // Metadata Citadel Gardens
+      { x: 1, y: 1, type: 'oak' },
+      { x: 8, y: 1, type: 'pine' },
+      { x: 1, y: 4, type: 'oak' },
+      { x: 1, y: 9, type: 'oak' },
+      { x: 8, y: 5, type: 'pine' },
+
+      // Automation Grid Industrial Yard
+      { x: 9, y: 1, type: 'pine' },
+      { x: 16, y: 1, type: 'pine' },
+      { x: 16, y: 6, type: 'pine' },
+
+      // Data Cloud Harbor Shoreline
+      { x: 17, y: 1, type: 'willow' },
+      { x: 17, y: 4, type: 'willow' },
+      { x: 25, y: 1, type: 'pine' },
+      { x: 26, y: 7, type: 'pine' },
+
+      // Agentforce Central Park / Quad
+      { x: 9, y: 10, type: 'cyber' },
+      { x: 15, y: 10, type: 'cyber' },
+      { x: 9, y: 16, type: 'cyber' },
+      { x: 15, y: 16, type: 'cyber' },
+
+      // Claudeforce Observatory Grounds
+      { x: 17, y: 10, type: 'oak' },
+      { x: 20, y: 12, type: 'oak' },
+      { x: 20, y: 15, type: 'pine' },
+
+      // Headless 360 Boulevard
+      { x: 1, y: 14, type: 'palm' },
+      { x: 8, y: 14, type: 'palm' },
+      { x: 1, y: 20, type: 'palm' },
+      { x: 8, y: 20, type: 'palm' },
+
+      // MCP Transit Buffer
+      { x: 14, y: 18, type: 'pine' },
+      { x: 23, y: 18, type: 'pine' },
+      { x: 25, y: 22, type: 'pine' },
+      { x: 14, y: 24, type: 'pine' }
+    ];
+
+    treeCoords.forEach(t => {
+      const wx = t.x * TILE_SIZE + 8;
+      const wy = t.y * TILE_SIZE + 4;
+      this.trees.push({
+        type: t.type,
+        x: wx,
+        y: wy,
+        w: 28,
+        h: 36,
+        sortY: wy + 32
+      });
+    });
+
+    // Street Lamps & Directional Signposts
+    const lampCoords = [
+      { x: 4, y: 9 }, { x: 7, y: 9 }, { x: 10, y: 9 }, { x: 13, y: 9 },
+      { x: 10, y: 4 }, { x: 10, y: 7 }, { x: 10, y: 14 }, { x: 10, y: 17 },
+      { x: 18, y: 9 }, { x: 22, y: 9 }, { x: 4, y: 16 }, { x: 7, y: 16 }
+    ];
+
+    lampCoords.forEach(l => {
+      const wx = l.x * TILE_SIZE + 16;
+      const wy = l.y * TILE_SIZE + 8;
+      this.props.push({
+        type: 'lamp',
+        x: wx,
+        y: wy,
+        sortY: wy + 26
+      });
+    });
+
+    // Directional Signposts
+    this.props.push({
+      type: 'sign',
+      x: 10 * TILE_SIZE + 24,
+      y: 9 * TILE_SIZE + 12,
+      label: 'Citadel / Forum',
+      sortY: 9 * TILE_SIZE + 28
+    });
+    this.props.push({
+      type: 'sign',
+      x: 18 * TILE_SIZE + 8,
+      y: 9 * TILE_SIZE + 12,
+      label: 'Data Harbor →',
+      sortY: 9 * TILE_SIZE + 28
+    });
+    this.props.push({
+      type: 'sign',
+      x: 10 * TILE_SIZE + 24,
+      y: 16 * TILE_SIZE + 12,
+      label: '← Headless / MCP →',
+      sortY: 16 * TILE_SIZE + 28
+    });
+  }
+
+  isColliding(boxX, boxY, boxW, boxH) {
+    // 1. World Bounds
+    if (boxX < 0 || boxX + boxW > WORLD_WIDTH || boxY < 0 || boxY + boxH > WORLD_HEIGHT) {
+      return true;
+    }
+
+    // 2. Tile-based solid check (Water tiles without bridges)
+    const startTileX = Math.floor(boxX / TILE_SIZE);
+    const endTileX = Math.floor((boxX + boxW) / TILE_SIZE);
+    const startTileY = Math.floor(boxY / TILE_SIZE);
+    const endTileY = Math.floor((boxY + boxH) / TILE_SIZE);
+
+    for (let ty = startTileY; ty <= endTileY; ty++) {
+      for (let tx = startTileX; tx <= endTileX; tx++) {
+        if (ty >= 0 && ty < GRID_SIZE && tx >= 0 && tx < GRID_SIZE) {
+          const type = this.tileMap[ty][tx];
+          // Water tile (type 3) is impassable unless on bridge (y == 5)
+          if (type === 3) {
+            // Harbor bridge crossing at y = 5
+            if (ty === 5) continue;
+            return true;
+          }
+        }
+      }
+    }
+
+    // 3. Building Footprint Collisions
+    for (const b of this.buildings) {
+      if (boxX < b.solidX + b.solidW &&
+          boxX + boxW > b.solidX &&
+          boxY < b.solidY + b.solidH &&
+          boxY + boxH > b.solidY) {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  getNearbyBuilding(playerX, playerY, radius = 42) {
+    for (const b of this.buildings) {
+      const dist = Math.hypot(playerX - b.entranceX, playerY - b.entranceY);
+      if (dist <= radius) {
+        return b;
+      }
+    }
+    return null;
+  }
+
+  render(ctx, player, viewport, timestamp = 0) {
+    // 1. Render Terrain Tiles
+    this.renderTerrain(ctx, viewport, timestamp);
+
+    // 2. Collect All Y-Sorted Renderables
+    const drawables = [];
+
+    // Add buildings
+    this.buildings.forEach(b => {
+      drawables.push({
+        sortY: b.sortY,
+        render: () => this.renderLandmark(ctx, b, timestamp)
+      });
+    });
+
+    // Add trees
+    this.trees.forEach(t => {
+      drawables.push({
+        sortY: t.sortY,
+        render: () => this.renderTree(ctx, t, timestamp)
+      });
+    });
+
+    // Add street props
+    this.props.forEach(p => {
+      drawables.push({
+        sortY: p.sortY,
+        render: () => this.renderProp(ctx, p, timestamp)
+      });
+    });
+
+    // Add player character
+    if (player) {
+      drawables.push({
+        sortY: player.y,
+        render: () => player.render(ctx)
+      });
+    }
+
+    // 3. Sort Drawables by Y anchor (Depth Sorting!)
+    drawables.sort((a, b) => a.sortY - b.sortY);
+
+    // 4. Render Sorted Entities
+    drawables.forEach(d => d.render());
+
+    // 5. Render Environmental Overlays (Lamp glow cones & particles)
+    this.renderAtmosphericLighting(ctx, viewport, timestamp);
+
+    // 6. Interaction Prompt (if near entrance)
+    if (player) {
+      const nearby = this.getNearbyBuilding(player.x, player.y);
+      if (nearby) {
+        this.renderInteractionPrompt(ctx, nearby, timestamp);
+      }
+    }
+  }
+
+  renderTerrain(ctx, vp, timestamp) {
+    const minTX = Math.max(0, Math.floor(vp.x / TILE_SIZE) - 1);
+    const maxTX = Math.min(GRID_SIZE - 1, Math.ceil((vp.x + vp.width) / TILE_SIZE) + 1);
+    const minTY = Math.max(0, Math.floor(vp.y / TILE_SIZE) - 1);
+    const maxTY = Math.min(GRID_SIZE - 1, Math.ceil((vp.y + vp.height) / TILE_SIZE) + 1);
+
+    for (let ty = minTY; ty <= maxTY; ty++) {
+      for (let tx = minTX; tx <= maxTX; tx++) {
+        const type = this.tileMap[ty][tx];
+        const px = tx * TILE_SIZE;
+        const py = ty * TILE_SIZE;
+
+        if (type === 3) {
+          // --- DATA CLOUD HARBOR WATER ---
+          const wave = Math.sin(timestamp * 0.003 + (tx + ty) * 0.8) * 4;
+          ctx.fillStyle = '#0369a1'; // Deep oceanic blue
+          ctx.fillRect(px, py, TILE_SIZE, TILE_SIZE);
+
+          // Lighter water ripples
+          ctx.fillStyle = 'rgba(56, 189, 248, 0.4)';
+          ctx.fillRect(px + 4, py + 8 + wave, 14, 2);
+          ctx.fillRect(px + 20, py + 22 - wave, 12, 2);
+
+          // Shoreline foam on edges bordering non-water
+          if (tx > 0 && this.tileMap[ty][tx - 1] !== 3) {
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
+            ctx.fillRect(px, py, 3, TILE_SIZE);
+          }
+          if (ty < GRID_SIZE - 1 && this.tileMap[ty + 1][tx] !== 3) {
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
+            ctx.fillRect(px, py + TILE_SIZE - 3, TILE_SIZE, 3);
+          }
+        } else if (type === 1 || type === 2) {
+          // --- PAVED TRANSIT AVENUE ---
+          ctx.fillStyle = '#1e293b'; // Slate asphalt
+          ctx.fillRect(px, py, TILE_SIZE, TILE_SIZE);
+
+          // Curbs
+          ctx.fillStyle = '#475569';
+          ctx.fillRect(px, py, TILE_SIZE, 2);
+          ctx.fillRect(px, py + TILE_SIZE - 2, TILE_SIZE, 2);
+
+          // Road markings / Fiber-optic conduit strip
+          if (type === 2) {
+            const glow = (Math.sin(timestamp * 0.005 + tx) + 1) / 2;
+            ctx.fillStyle = `rgba(56, 189, 248, ${0.4 + glow * 0.4})`;
+            ctx.fillRect(px, py + TILE_SIZE / 2 - 1.5, TILE_SIZE, 3);
+          } else {
+            // Broken white centerline
+            if (tx % 2 === 0 || ty % 2 === 0) {
+              ctx.fillStyle = 'rgba(255, 255, 255, 0.25)';
+              ctx.fillRect(px + 6, py + TILE_SIZE / 2 - 1, 14, 2);
+            }
+          }
+        } else if (type === 5) {
+          // --- AGENTFORCE CENTRAL PLAZA ---
+          ctx.fillStyle = '#1e1b4b'; // Deep violet stone
+          ctx.fillRect(px, py, TILE_SIZE, TILE_SIZE);
+
+          // Geometric tile pattern
+          ctx.strokeStyle = 'rgba(168, 85, 247, 0.25)';
+          ctx.lineWidth = 1;
+          ctx.strokeRect(px + 2, py + 2, TILE_SIZE - 4, TILE_SIZE - 4);
+        } else if (type === 6) {
+          // --- MAGLEV TRANSIT TRACK ---
+          ctx.fillStyle = '#18181b';
+          ctx.fillRect(px, py, TILE_SIZE, TILE_SIZE);
+
+          // Sleepers
+          ctx.fillStyle = '#3f3f46';
+          ctx.fillRect(px + 4, py + 4, TILE_SIZE - 8, 3);
+          ctx.fillRect(px + 4, py + 18, TILE_SIZE - 8, 3);
+          ctx.fillRect(px + 4, py + 32, TILE_SIZE - 8, 3);
+
+          // Glowing Magenta Power Rail
+          ctx.fillStyle = '#ec4899';
+          ctx.fillRect(px + 8, py, 3, TILE_SIZE);
+          ctx.fillRect(px + TILE_SIZE - 11, py, 3, TILE_SIZE);
+        } else {
+          // --- LUSH COUNTRYSIDE / TOWN TURF ---
+          // Varied grass tones based on coordinates
+          const isLighter = (tx * 7 + ty * 13) % 5 === 0;
+          ctx.fillStyle = isLighter ? '#14532d' : '#166534'; // Rich RPG green
+          ctx.fillRect(px, py, TILE_SIZE, TILE_SIZE);
+
+          // Subtle grass blade specks
+          if ((tx + ty) % 3 === 0) {
+            ctx.fillStyle = '#22c55e';
+            ctx.fillRect(px + 8, py + 12, 2, 3);
+            ctx.fillRect(px + 10, py + 11, 2, 4);
+          }
+          // Tiny wildflower dots
+          if ((tx * 3 + ty * 7) % 11 === 0) {
+            ctx.fillStyle = (tx % 2 === 0) ? '#fbbf24' : '#f472b6';
+            ctx.fillRect(px + 24, py + 20, 2.5, 2.5);
+          }
+        }
+      }
+    }
+
+    // Canal Bridge crossing water at y = 5, x in [18..27]
+    const bridgeY = 5 * TILE_SIZE;
+    ctx.fillStyle = '#334155'; // Stone bridge deck
+    ctx.fillRect(18 * TILE_SIZE, bridgeY, 9 * TILE_SIZE, TILE_SIZE);
+    // Stone balustrade railings
+    ctx.fillStyle = '#64748b';
+    ctx.fillRect(18 * TILE_SIZE, bridgeY, 9 * TILE_SIZE, 4);
+    ctx.fillRect(18 * TILE_SIZE, bridgeY + TILE_SIZE - 4, 9 * TILE_SIZE, 4);
+  }
+
+  renderTree(ctx, t, timestamp) {
+    const { x, y, type } = t;
+
+    ctx.save();
+    // Tree ground shadow
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
+    ctx.beginPath();
+    ctx.ellipse(x + 14, y + 30, 14, 6, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Trunk
+    ctx.fillStyle = '#78350f';
+    ctx.fillRect(x + 11, y + 16, 6, 16);
+
+    if (type === 'pine') {
+      // Pine Needle Triangles
+      ctx.fillStyle = '#064e3b';
+      ctx.beginPath();
+      ctx.moveTo(x + 14, y - 10);
+      ctx.lineTo(x + 28, y + 10);
+      ctx.lineTo(x, y + 10);
+      ctx.closePath();
+      ctx.fill();
+
+      ctx.fillStyle = '#047857';
+      ctx.beginPath();
+      ctx.moveTo(x + 14, y - 2);
+      ctx.lineTo(x + 26, y + 18);
+      ctx.lineTo(x + 2, y + 18);
+      ctx.closePath();
+      ctx.fill();
+    } else if (type === 'cyber') {
+      // Agentforce Glowing Hologram Tree
+      const pulse = Math.sin(timestamp * 0.004 + x) * 2;
+      ctx.fillStyle = 'rgba(168, 85, 247, 0.85)';
+      ctx.beginPath();
+      ctx.arc(x + 14, y + 6, 16 + pulse, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = '#f3e8ff';
+      ctx.beginPath();
+      ctx.arc(x + 14, y + 6, 8, 0, Math.PI * 2);
+      ctx.fill();
+    } else {
+      // Oak Canopy
+      ctx.fillStyle = '#15803d';
+      ctx.beginPath();
+      ctx.arc(x + 14, y + 8, 15, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.fillStyle = '#22c55e';
+      ctx.beginPath();
+      ctx.arc(x + 10, y + 4, 8, 0, Math.PI * 2);
+      ctx.arc(x + 18, y + 6, 7, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    ctx.restore();
+  }
+
+  renderProp(ctx, p, timestamp) {
+    if (p.type === 'lamp') {
+      // Victorian Street Lamp Post
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
+      ctx.beginPath();
+      ctx.ellipse(p.x, p.y + 24, 6, 3, 0, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Iron Post
+      ctx.fillStyle = '#1e293b';
+      ctx.fillRect(p.x - 1.5, p.y, 3, 24);
+      // Lamp Head
+      ctx.fillStyle = '#f59e0b';
+      ctx.fillRect(p.x - 4, p.y - 4, 8, 6);
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(p.x - 2, p.y - 2, 4, 3);
+    } else if (p.type === 'sign') {
+      // Wooden Signpost
+      ctx.fillStyle = '#78350f';
+      ctx.fillRect(p.x - 2, p.y, 4, 20);
+      ctx.fillStyle = '#b45309';
+      ctx.fillRect(p.x - 18, p.y - 8, 36, 12);
+      ctx.strokeStyle = '#451a03';
+      ctx.lineWidth = 1;
+      ctx.strokeRect(p.x - 18, p.y - 8, 36, 12);
+
+      ctx.fillStyle = '#fef3c7';
+      ctx.font = '600 7px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText(p.label, p.x, p.y);
+    }
+  }
+
+  renderLandmark(ctx, b, timestamp) {
+    const { worldX: x, worldY: y, worldW: w, worldH: h } = b;
+
+    ctx.save();
+
+    // 1. Building Drop Shadow
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.45)';
+    ctx.beginPath();
+    ctx.roundRect(x + 6, y + h - 8, w - 4, 14, 4);
+    ctx.fill();
+
+    // 2. Custom Handcrafted Silhouette by Building ID
+    if (b.id === 'b_standard_objects') {
+      // === STANDARD OBJECTS TOWER (Grand Civic Archive) ===
+      // Main Stone Wall
+      ctx.fillStyle = '#1e293b';
+      ctx.fillRect(x, y + 16, w, h - 16);
+
+      // Pitched Slate Mansard Roof
+      ctx.fillStyle = '#0f172a';
+      ctx.beginPath();
+      ctx.moveTo(x - 4, y + 18);
+      ctx.lineTo(x + w / 2, y - 12);
+      ctx.lineTo(x + w + 4, y + 18);
+      ctx.closePath();
+      ctx.fill();
+      ctx.strokeStyle = '#38bdf8';
+      ctx.lineWidth = 2;
+      ctx.stroke();
+
+      // Arched Library Windows with warm interior light
+      ctx.fillStyle = '#fef08a';
+      ctx.fillRect(x + 10, y + 26, 12, 16);
+      ctx.fillRect(x + w - 22, y + 26, 12, 16);
+
+      // Grand Brass Double Doors
+      ctx.fillStyle = '#b45309';
+      ctx.fillRect(x + w / 2 - 10, y + h - 22, 20, 22);
+      ctx.strokeStyle = '#f59e0b';
+      ctx.strokeRect(x + w / 2 - 10, y + h - 22, 20, 22);
+
+      // Bronze Plaque
+      ctx.fillStyle = '#38bdf8';
+      ctx.font = '700 8px JetBrains Mono, monospace';
+      ctx.textAlign = 'center';
+      ctx.fillText('METADATA', x + w / 2, y + 12);
+
+    } else if (b.id === 'b_security_fortress') {
+      // === SECURITY CITADEL (Fortress Keep) ===
+      ctx.fillStyle = '#0f172a';
+      ctx.fillRect(x, y + 10, w, h - 10);
+
+      // Crenellated Battlements
+      for (let cx = x; cx < x + w; cx += 16) {
+        ctx.fillRect(cx, y + 2, 10, 8);
+      }
+      ctx.strokeStyle = '#38bdf8';
+      ctx.lineWidth = 1.5;
+      ctx.strokeRect(x, y + 10, w, h - 10);
+
+      // Iron Portcullis Gate
+      ctx.fillStyle = '#0284c7';
+      ctx.fillRect(x + w / 2 - 12, y + h - 24, 24, 24);
+      // Gate Grates
+      ctx.strokeStyle = '#0369a1';
+      ctx.lineWidth = 1.5;
+      ctx.strokeRect(x + w / 2 - 12, y + h - 24, 24, 24);
+
+      // Guard Lights
+      ctx.fillStyle = '#38bdf8';
+      ctx.beginPath();
+      ctx.arc(x + 10, y + 18, 3, 0, Math.PI * 2);
+      ctx.arc(x + w - 10, y + 18, 3, 0, Math.PI * 2);
+      ctx.fill();
+
+    } else if (b.id === 'b_apex_foundry') {
+      // === APEX FOUNDRY (Industrial Forge) ===
+      ctx.fillStyle = '#7f1d1d'; // Deep Foundry Brick
+      ctx.fillRect(x, y + 12, w, h - 12);
+
+      // Corrugated Metal Roof
+      ctx.fillStyle = '#450a0a';
+      ctx.fillRect(x - 2, y + 6, w + 4, 10);
+
+      // Brick Smokestack Chimney with animated smoke puffs
+      ctx.fillStyle = '#991b1b';
+      ctx.fillRect(x + w - 16, y - 18, 12, 28);
+      // Smoke puff
+      const puffY = (timestamp * 0.02) % 20;
+      ctx.fillStyle = 'rgba(203, 213, 225, 0.4)';
+      ctx.beginPath();
+      ctx.arc(x + w - 10, y - 22 - puffY, 5 + puffY * 0.3, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Glowing Blast Furnace Aperture
+      const glow = Math.sin(timestamp * 0.006) * 0.2;
+      ctx.fillStyle = `rgba(249, 115, 22, ${0.8 + glow})`;
+      ctx.fillRect(x + 12, y + 26, 18, 14);
+
+      // Heavy Iron Double Doors
+      ctx.fillStyle = '#1e293b';
+      ctx.fillRect(x + w / 2 - 10, y + h - 20, 20, 20);
+
+    } else if (b.id === 'b_flow_powerhouse') {
+      // === FLOW HYDRO-AUTOMATION PLANT ===
+      ctx.fillStyle = '#1e293b';
+      ctx.fillRect(x, y + 14, w, h - 14);
+
+      // Turning Hydro Paddle Wheel on side
+      const angle = timestamp * 0.003;
+      const wx = x - 6;
+      const wy = y + h - 16;
+      ctx.strokeStyle = '#f59e0b';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.arc(wx, wy, 10, 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(wx + Math.cos(angle) * 10, wy + Math.sin(angle) * 10);
+      ctx.lineTo(wx - Math.cos(angle) * 10, wy - Math.sin(angle) * 10);
+      ctx.stroke();
+
+      // Copper Steam Pipes across facade
+      ctx.fillStyle = '#b45309';
+      ctx.fillRect(x + 8, y + 10, w - 16, 4);
+
+      // Entrance
+      ctx.fillStyle = '#0f172a';
+      ctx.fillRect(x + w / 2 - 9, y + h - 18, 18, 18);
+
+    } else if (b.id === 'b_calculated_insights') {
+      // === CALCULATED INSIGHTS LIGHTHOUSE ===
+      // Tapered Lighthouse Tower
+      ctx.fillStyle = '#f1f5f9';
+      ctx.beginPath();
+      ctx.moveTo(x + 16, y + h);
+      ctx.lineTo(x + w - 16, y + h);
+      ctx.lineTo(x + w - 20, y);
+      ctx.lineTo(x + 20, y);
+      ctx.closePath();
+      ctx.fill();
+      ctx.strokeStyle = '#06b6d4';
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+
+      // Red Nautical Stripes
+      ctx.fillStyle = '#06b6d4';
+      ctx.fillRect(x + 18, y + 20, w - 36, 12);
+      ctx.fillRect(x + 19, y + 42, w - 38, 12);
+
+      // Lantern Room on top
+      ctx.fillStyle = '#0f172a';
+      ctx.fillRect(x + w / 2 - 12, y - 10, 24, 12);
+      ctx.fillStyle = '#38bdf8';
+      ctx.fillRect(x + w / 2 - 8, y - 8, 16, 8);
+
+      // Rotating 360° Searchlight Beam
+      const beamAngle = timestamp * 0.0025;
+      ctx.save();
+      ctx.beginPath();
+      ctx.moveTo(x + w / 2, y - 4);
+      ctx.arc(x + w / 2, y - 4, 100, beamAngle - 0.2, beamAngle + 0.2);
+      ctx.closePath();
+      ctx.fillStyle = 'rgba(6, 182, 212, 0.18)';
+      ctx.fill();
+      ctx.restore();
+
+      // Door
+      ctx.fillStyle = '#0f172a';
+      ctx.fillRect(x + w / 2 - 6, y + h - 14, 12, 14);
+
+    } else if (b.id === 'b_data_lake') {
+      // === DATA LAKE RESERVOIR (Stone Embankment & Floodgate) ===
+      ctx.fillStyle = '#0e7490';
+      ctx.fillRect(x, y + 8, w, h - 8);
+
+      // Churning water in reservoir pool
+      ctx.fillStyle = '#06b6d4';
+      ctx.fillRect(x + 6, y + 14, w - 12, h - 24);
+
+      // Sluice gates
+      ctx.fillStyle = '#155e75';
+      ctx.fillRect(x + 14, y + h - 14, 14, 14);
+      ctx.fillRect(x + w - 28, y + h - 14, 14, 14);
+
+    } else if (b.id === 'b_agentforce_core') {
+      // === ATLAS REASONING ENGINE SPIRE ===
+      // Futuristic Cylindrical Rotunda
+      ctx.fillStyle = '#2e1065'; // Dark Imperial Violet
+      ctx.fillRect(x, y + 16, w, h - 16);
+      ctx.strokeStyle = '#c084fc';
+      ctx.lineWidth = 2;
+      ctx.strokeRect(x, y + 16, w, h - 16);
+
+      // Glass Dome
+      ctx.fillStyle = 'rgba(168, 85, 247, 0.3)';
+      ctx.beginPath();
+      ctx.arc(x + w / 2, y + 16, w / 2 - 4, Math.PI, 0);
+      ctx.fill();
+      ctx.strokeStyle = '#a855f7';
+      ctx.stroke();
+
+      // Floating Pulsing Violet Atlas Core
+      const coreBob = Math.sin(timestamp * 0.005) * 3;
+      const corePulse = Math.sin(timestamp * 0.008) * 3;
+      ctx.fillStyle = '#ffffff';
+      ctx.beginPath();
+      ctx.arc(x + w / 2, y - 4 + coreBob, 10 + corePulse, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = '#a855f7';
+      ctx.beginPath();
+      ctx.arc(x + w / 2, y - 4 + coreBob, 6, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Orbital Rings
+      ctx.beginPath();
+      ctx.ellipse(x + w / 2, y - 4 + coreBob, 20, 7, timestamp * 0.002, 0, Math.PI * 2);
+      ctx.strokeStyle = 'rgba(0, 240, 255, 0.8)';
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+
+      // Entrance Portico
+      ctx.fillStyle = '#581c87';
+      ctx.fillRect(x + w / 2 - 12, y + h - 22, 24, 22);
+
+    } else if (b.id === 'b_claudeforce_lab') {
+      // === CLAUDE 3.5 COGNITIVE OBSERVATORY ===
+      ctx.fillStyle = '#1c1917'; // Rich scholarly granite
+      ctx.fillRect(x, y + 14, w, h - 14);
+
+      // Classical Copper Observatory Dome (patinated green-copper)
+      ctx.fillStyle = '#059669';
+      ctx.beginPath();
+      ctx.arc(x + w / 2, y + 14, w / 2 - 6, Math.PI, 0);
+      ctx.fill();
+      ctx.strokeStyle = '#f97316';
+      ctx.lineWidth = 2;
+      ctx.stroke();
+
+      // Brass Telescope extending from dome slot
+      const tAngle = timestamp * 0.025;
+      ctx.strokeStyle = '#d97706';
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.moveTo(x + w / 2, y + 14);
+      ctx.lineTo(x + w / 2 + Math.cos(tAngle) * 22, y + 14 + Math.sin(tAngle) * 10 - 10);
+      ctx.stroke();
+
+      // Arched Entrance & Library Windows
+      ctx.fillStyle = '#fb923c';
+      ctx.fillRect(x + 8, y + 24, 10, 14);
+      ctx.fillRect(x + w - 18, y + 24, 10, 14);
+      ctx.fillStyle = '#292524';
+      ctx.fillRect(x + w / 2 - 10, y + h - 18, 20, 18);
+
+    } else if (b.id === 'b_headless_gateway') {
+      // === HEADLESS 360 SKYPORT GATEWAY ===
+      ctx.fillStyle = '#064e3b';
+      ctx.fillRect(x, y + 12, w, h - 12);
+
+      // Cantilevered Aerospace Departure Deck
+      ctx.fillStyle = '#10b981';
+      ctx.fillRect(x - 4, y + 4, w + 8, 10);
+
+      // Labeled 'HXL' on canopy
+      ctx.fillStyle = '#ffffff';
+      ctx.font = '700 8px JetBrains Mono, monospace';
+      ctx.textAlign = 'center';
+      ctx.fillText('HEADLESS 360', x + w / 2, y + 12);
+
+      // Runway Guidance Strobes
+      const strobe = Math.sin(timestamp * 0.01) > 0;
+      ctx.fillStyle = strobe ? '#34d399' : '#047857';
+      ctx.fillRect(x + 4, y + h - 4, 6, 4);
+      ctx.fillRect(x + w - 10, y + h - 4, 6, 4);
+
+      // Glass Sliding Doors
+      ctx.fillStyle = 'rgba(56, 189, 248, 0.6)';
+      ctx.fillRect(x + w / 2 - 12, y + h - 20, 24, 20);
+
+    } else if (b.id.startsWith('b_mcp')) {
+      // === DUAL-PLANE MCP SERVERS ===
+      const isPlane1 = b.id === 'b_mcp_context';
+      ctx.fillStyle = '#18181b';
+      ctx.fillRect(x, y + 10, w, h - 10);
+
+      // Terminal Antenna & Switching Box
+      ctx.fillStyle = isPlane1 ? '#0284c7' : '#db2777';
+      ctx.fillRect(x + 4, y + 4, w - 8, 8);
+
+      // Glowing Server Rack Bank Windows
+      ctx.fillStyle = isPlane1 ? '#38bdf8' : '#ec4899';
+      ctx.fillRect(x + 8, y + 18, 12, 10);
+      ctx.fillRect(x + w - 20, y + 18, 12, 10);
+
+      // Protocol Label
+      ctx.fillStyle = '#ffffff';
+      ctx.font = '700 7px JetBrains Mono, monospace';
+      ctx.textAlign = 'center';
+      ctx.fillText(isPlane1 ? 'MCP: CONTEXT' : 'MCP: ACTION', x + w / 2, y + 10);
+
+      // Transit Access Door
+      ctx.fillStyle = '#27272a';
+      ctx.fillRect(x + w / 2 - 9, y + h - 16, 18, 16);
+
+    } else {
+      // Default High-Quality Modular Landmark
+      ctx.fillStyle = '#1e293b';
+      ctx.fillRect(x, y + 12, w, h - 12);
+      ctx.fillStyle = b.color || '#38bdf8';
+      ctx.fillRect(x + 2, y + 4, w - 4, 10);
+      ctx.strokeStyle = '#ffffff';
+      ctx.lineWidth = 1;
+      ctx.strokeRect(x, y + 12, w, h - 12);
+
+      // Door
+      ctx.fillStyle = '#0f172a';
+      ctx.fillRect(x + w / 2 - 8, y + h - 16, 16, 16);
+    }
+
+    // 3. Entrance Indicator (Door Mat)
+    ctx.fillStyle = 'rgba(56, 189, 248, 0.4)';
+    ctx.fillRect(b.entranceX - 8, b.entranceY - 6, 16, 4);
+
+    // 4. District Pill Badge
+    ctx.fillStyle = 'rgba(10, 15, 26, 0.85)';
+    ctx.strokeStyle = b.color || '#38bdf8';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.roundRect(x + 4, y - 8, w - 8, 14, 4);
+    ctx.fill();
+    ctx.stroke();
+
+    ctx.fillStyle = '#ffffff';
+    ctx.font = '600 8px Plus Jakarta Sans, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(b.name.split(' ')[0], x + w / 2, y - 1);
+
+    ctx.restore();
+  }
+
+  renderAtmosphericLighting(ctx, vp, timestamp) {
+    // Warm light pools under street lamps
+    this.props.filter(p => p.type === 'lamp').forEach(p => {
+      const grad = ctx.createRadialGradient(p.x, p.y + 20, 2, p.x, p.y + 20, 36);
+      grad.addColorStop(0, 'rgba(251, 191, 36, 0.15)');
+      grad.addColorStop(1, 'rgba(251, 191, 36, 0)');
+      ctx.fillStyle = grad;
+      ctx.beginPath();
+      ctx.arc(p.x, p.y + 20, 36, 0, Math.PI * 2);
+      ctx.fill();
+    });
+  }
+
+  renderInteractionPrompt(ctx, b, timestamp) {
+    const bob = Math.sin(timestamp * 0.008) * 3;
+    const px = b.entranceX;
+    const py = b.entranceY - 26 + bob;
+
+    ctx.save();
+    ctx.fillStyle = 'rgba(10, 15, 26, 0.95)';
+    ctx.strokeStyle = '#00f0ff';
+    ctx.lineWidth = 1.5;
+
+    const w = 90;
+    const h = 20;
+    ctx.beginPath();
+    ctx.roundRect(px - w / 2, py - h / 2, w, h, 6);
+    ctx.fill();
+    ctx.stroke();
+
+    ctx.fillStyle = '#ffffff';
+    ctx.font = '700 9px JetBrains Mono, monospace';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText('[E] INSPECT', px, py);
+    ctx.restore();
+  }
+}
+
+  /**
+ * PlayerCharacter.js - The "Salesforce Explorer"
+ * Handcrafted retro RPG explorer with 4-directional walk cycles,
+ * sub-pixel smooth movement, collision handling, and subtle idle animation.
+ */
+
+class PlayerCharacter {
+  constructor(worldX = 420, worldY = 420) {
+    this.x = worldX;
+    this.y = worldY;
+    this.vx = 0;
+    this.vy = 0;
+    this.speed = 150; // pixels per second
+
+    this.width = 24;
+    this.height = 32;
+    // Collision box anchored at feet
+    this.collider = {
+      offsetX: -9,
+      offsetY: -6,
+      width: 18,
+      height: 12
+    };
+
+    // Facing: 'down', 'up', 'left', 'right'
+    this.facing = 'down';
+    this.isMoving = false;
+
+    // Animation state
+    this.animTimer = 0;
+    this.animFrame = 0;
+    this.idleTimer = 0;
+
+    // Input state
+    this.keys = {
+      up: false,
+      down: false,
+      left: false,
+      right: false
+    };
+
+    this.bindInputs();
+  }
+
+  bindInputs() {
+    if (typeof window === "undefined") return;
+    window.addEventListener('keydown', (e) => {
+      if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+
+      if (e.key === 'w' || e.key === 'W' || e.key === 'ArrowUp') {
+        this.keys.up = true;
+      } else if (e.key === 's' || e.key === 'S' || e.key === 'ArrowDown') {
+        this.keys.down = true;
+      } else if (e.key === 'a' || e.key === 'A' || e.key === 'ArrowLeft') {
+        this.keys.left = true;
+      } else if (e.key === 'd' || e.key === 'D' || e.key === 'ArrowRight') {
+        this.keys.right = true;
+      }
+    });
+
+    window.addEventListener('keyup', (e) => {
+      if (e.key === 'w' || e.key === 'W' || e.key === 'ArrowUp') {
+        this.keys.up = false;
+      } else if (e.key === 's' || e.key === 'S' || e.key === 'ArrowDown') {
+        this.keys.down = false;
+      } else if (e.key === 'a' || e.key === 'A' || e.key === 'ArrowLeft') {
+        this.keys.left = false;
+      } else if (e.key === 'd' || e.key === 'D' || e.key === 'ArrowRight') {
+        this.keys.right = false;
+      }
+    });
+  }
+
+  update(dt, collisionChecker) {
+    let dx = 0;
+    let dy = 0;
+
+    if (this.keys.up) dy -= 1;
+    if (this.keys.down) dy += 1;
+    if (this.keys.left) dx -= 1;
+    if (this.keys.right) dx += 1;
+
+    this.isMoving = (dx !== 0 || dy !== 0);
+
+    if (this.isMoving) {
+      // Normalize diagonal speed
+      const len = Math.hypot(dx, dy);
+      dx /= len;
+      dy /= len;
+
+      // Update facing direction
+      if (Math.abs(dx) > Math.abs(dy)) {
+        this.facing = dx > 0 ? 'right' : 'left';
+      } else {
+        this.facing = dy > 0 ? 'down' : 'up';
+      }
+
+      // Step animation
+      this.animTimer += dt * 8;
+      this.animFrame = Math.floor(this.animTimer) % 4;
+
+      // Calculate desired new position with delta time
+      const moveDistance = this.speed * dt;
+      const targetX = this.x + dx * moveDistance;
+      const targetY = this.y + dy * moveDistance;
+
+      // Attempt full move, or slide on collision
+      if (collisionChecker) {
+        // Try X move
+        if (!collisionChecker(targetX + this.collider.offsetX, this.y + this.collider.offsetY, this.collider.width, this.collider.height)) {
+          this.x = targetX;
+        }
+        // Try Y move
+        if (!collisionChecker(this.x + this.collider.offsetX, targetY + this.collider.offsetY, this.collider.width, this.collider.height)) {
+          this.y = targetY;
+        }
+      } else {
+        this.x = targetX;
+        this.y = targetY;
+      }
+    } else {
+      this.animFrame = 0;
+      this.idleTimer += dt;
+    }
+  }
+
+  teleport(newX, newY) {
+    this.x = newX;
+    this.y = newY;
+    this.animFrame = 0;
+    this.isMoving = false;
+  }
+
+  render(ctx) {
+    const px = Math.round(this.x);
+    const py = Math.round(this.y);
+
+    ctx.save();
+    ctx.translate(px, py);
+
+    // 1. Soft Oval Ground Shadow
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.35)';
+    ctx.beginPath();
+    ctx.ellipse(0, 0, 10, 5, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Subtle idle breathing offset
+    const idleBob = this.isMoving ? (this.animFrame % 2 === 1 ? -1 : 0) : Math.sin(this.idleTimer * 2.5) * 0.75;
+    ctx.translate(0, idleBob);
+
+    // 2. Render Handcrafted Sprite Layers
+    this.renderSprite(ctx);
+
+    ctx.restore();
+  }
+
+  renderSprite(ctx) {
+    const f = this.facing;
+    const walk = this.animFrame; // 0, 1, 2, 3
+
+    // Leg offsets for walk animation
+    let leftLegY = 0;
+    let rightLegY = 0;
+    if (this.isMoving) {
+      if (walk === 0) { leftLegY = -3; rightLegY = 2; }
+      else if (walk === 1) { leftLegY = 0; rightLegY = 0; }
+      else if (walk === 2) { leftLegY = 2; rightLegY = -3; }
+      else if (walk === 3) { leftLegY = 0; rightLegY = 0; }
+    }
+
+    // --- LEGS & BOOTS ---
+    ctx.fillStyle = '#334155'; // Dark Navy Trousers
+    if (f === 'down' || f === 'up') {
+      ctx.fillRect(-6, -8 + leftLegY, 5, 8);
+      ctx.fillRect(1, -8 + rightLegY, 5, 8);
+
+      // Brown Boots
+      ctx.fillStyle = '#78350f';
+      ctx.fillRect(-6, -3 + leftLegY, 5, 4);
+      ctx.fillRect(1, -3 + rightLegY, 5, 4);
+    } else if (f === 'left') {
+      ctx.fillRect(-4, -8 + leftLegY, 6, 8);
+      ctx.fillStyle = '#78350f';
+      ctx.fillRect(-6, -3 + leftLegY, 7, 4);
+    } else if (f === 'right') {
+      ctx.fillRect(-2, -8 + rightLegY, 6, 8);
+      ctx.fillStyle = '#78350f';
+      ctx.fillRect(-1, -3 + rightLegY, 7, 4);
+    }
+
+    // --- BACKPACK (drawn behind body if facing up/left/right) ---
+    if (f === 'up') {
+      ctx.fillStyle = '#b45309'; // Leather backpack
+      ctx.fillRect(-7, -22, 14, 12);
+      ctx.fillStyle = '#92400e';
+      ctx.fillRect(-6, -24, 12, 4); // Bedroll / sleeping roll
+      ctx.strokeStyle = '#451a03';
+      ctx.lineWidth = 1;
+      ctx.strokeRect(-7, -22, 14, 12);
+    } else if (f === 'left') {
+      ctx.fillStyle = '#b45309';
+      ctx.fillRect(2, -22, 5, 12);
+    } else if (f === 'right') {
+      ctx.fillStyle = '#b45309';
+      ctx.fillRect(-7, -22, 5, 12);
+    }
+
+    // --- TORSO & ADVENTURER JACKET ---
+    ctx.fillStyle = '#0284c7'; // Salesforce Cerulean Blue Jacket
+    ctx.fillRect(-6, -20, 12, 13);
+
+    // Collar / Utility Vest Trim
+    ctx.fillStyle = '#f8fafc'; // White shirt / trim
+    if (f === 'down') {
+      ctx.fillRect(-2, -20, 4, 6);
+      // Utility pockets
+      ctx.fillStyle = '#0369a1';
+      ctx.fillRect(-5, -13, 4, 4);
+      ctx.fillRect(1, -13, 4, 4);
+      // Explorer belt & gold buckle
+      ctx.fillStyle = '#78350f';
+      ctx.fillRect(-6, -9, 12, 2);
+      ctx.fillStyle = '#fbbf24';
+      ctx.fillRect(-1.5, -9.5, 3, 3);
+    } else if (f === 'left') {
+      ctx.fillStyle = '#0369a1';
+      ctx.fillRect(-4, -13, 4, 4);
+      ctx.fillStyle = '#78350f';
+      ctx.fillRect(-6, -9, 11, 2);
+    } else if (f === 'right') {
+      ctx.fillStyle = '#0369a1';
+      ctx.fillRect(0, -13, 4, 4);
+      ctx.fillStyle = '#78350f';
+      ctx.fillRect(-5, -9, 11, 2);
+    }
+
+    // --- ARMS ---
+    ctx.fillStyle = '#0284c7';
+    let armSwing = this.isMoving ? Math.sin(this.animTimer * 2) * 2 : 0;
+    if (f === 'down') {
+      ctx.fillRect(-8, -20 + armSwing, 3, 9);
+      ctx.fillRect(5, -20 - armSwing, 3, 9);
+      // Hands
+      ctx.fillStyle = '#fed7aa';
+      ctx.fillRect(-8, -11 + armSwing, 3, 2.5);
+      ctx.fillRect(5, -11 - armSwing, 3, 2.5);
+    } else if (f === 'up') {
+      ctx.fillRect(-8, -20 - armSwing, 3, 9);
+      ctx.fillRect(5, -20 + armSwing, 3, 9);
+    } else if (f === 'left') {
+      ctx.fillRect(-4, -20 + armSwing, 3, 9);
+      ctx.fillStyle = '#fed7aa';
+      ctx.fillRect(-4, -11 + armSwing, 3, 2.5);
+    } else if (f === 'right') {
+      ctx.fillRect(1, -20 - armSwing, 3, 9);
+      ctx.fillStyle = '#fed7aa';
+      ctx.fillRect(1, -11 - armSwing, 3, 2.5);
+    }
+
+    // --- HEAD & FACE ---
+    ctx.fillStyle = '#fed7aa'; // Skin Tone
+    ctx.fillRect(-5, -28, 10, 9);
+
+    if (f === 'down') {
+      // Eyes
+      ctx.fillStyle = '#0f172a';
+      ctx.fillRect(-3, -24, 2, 2.5);
+      ctx.fillRect(1, -24, 2, 2.5);
+      // Eye glint
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(-3, -24, 1, 1);
+      ctx.fillRect(1, -24, 1, 1);
+    } else if (f === 'left') {
+      ctx.fillStyle = '#0f172a';
+      ctx.fillRect(-4, -24, 2, 2.5);
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(-4, -24, 1, 1);
+    } else if (f === 'right') {
+      ctx.fillStyle = '#0f172a';
+      ctx.fillRect(2, -24, 2, 2.5);
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(3, -24, 1, 1);
+    }
+
+    // --- HAIR & EXPLORER CAP ---
+    ctx.fillStyle = '#451a03'; // Brown Hair
+    if (f === 'down') {
+      ctx.fillRect(-6, -29, 12, 3);
+      ctx.fillRect(-6, -26, 2, 4);
+      ctx.fillRect(4, -26, 2, 4);
+    } else if (f === 'up') {
+      ctx.fillRect(-6, -29, 12, 8);
+    } else if (f === 'left') {
+      ctx.fillRect(-5, -29, 11, 4);
+      ctx.fillRect(2, -27, 3, 5);
+    } else if (f === 'right') {
+      ctx.fillRect(-6, -29, 11, 4);
+      ctx.fillRect(-5, -27, 3, 5);
+    }
+
+    // Explorer Cap / Headband with Gold Badge
+    ctx.fillStyle = '#0369a1';
+    ctx.fillRect(-7, -32, 14, 4);
+    // Cap brim
+    if (f === 'down') {
+      ctx.fillRect(-8, -29, 16, 2);
+      ctx.fillStyle = '#f59e0b'; // Gold Cloud Badge
+      ctx.fillRect(-2, -32, 4, 3);
+    } else if (f === 'left') {
+      ctx.fillRect(-9, -29, 14, 2);
+    } else if (f === 'right') {
+      ctx.fillRect(-5, -29, 14, 2);
+    } else if (f === 'up') {
+      ctx.fillRect(-7, -29, 14, 2);
+    }
+
+    // Subtle 1px crisp outline around character silhouette
+    ctx.strokeStyle = 'rgba(0, 0, 0, 0.4)';
+    ctx.lineWidth = 0.75;
+    ctx.strokeRect(-6.5, -32.5, 13, 31);
+  }
+}
+
   
 
 class BuildingInspector {
@@ -3418,6 +4759,527 @@ function escapeHtml(str) {
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;')
     .replace(/'/g, '&#039;');
+}
+
+  /**
+ * FieldGuide.js - Discovery Tracker & Architectural Field Guide
+ * Records landmarks discovered by the explorer in localStorage,
+ * provides celebratory discovery popups, district completion stats,
+ * and fast-travel coordinates for discovered landmarks.
+ */
+
+
+
+const STORAGE_KEY = 'salesforce_rpg_discovery_v1';
+
+class FieldGuide {
+  constructor(container, catalog, onFastTravel, onOpenDossier) {
+    this.container = container;
+    this.catalog = catalog;
+    this.onFastTravel = onFastTravel;
+    this.onOpenDossier = onOpenDossier;
+
+    this.discoveredIds = new Set();
+    this.totalLandmarks = catalog.buildings.length;
+    this.toastTimer = null;
+
+    this.loadState();
+  }
+
+  loadState() {
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      if (saved) {
+        const arr = JSON.parse(saved);
+        arr.forEach(id => this.discoveredIds.add(id));
+      }
+    } catch (e) {
+      console.warn('Could not read discovery state from localStorage', e);
+    }
+  }
+
+  saveState() {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify([...this.discoveredIds]));
+    } catch (e) {
+      console.warn('Could not save discovery state to localStorage', e);
+    }
+  }
+
+  isDiscovered(id) {
+    return this.discoveredIds.has(id);
+  }
+
+  discover(building) {
+    if (this.discoveredIds.has(building.id)) return false;
+
+    this.discoveredIds.add(building.id);
+    this.saveState();
+    sfx.simulationStep();
+
+    this.showDiscoveryToast(building);
+
+    if (this.onDiscoveryChange) {
+      this.onDiscoveryChange(this.discoveredIds.size, this.totalLandmarks);
+    }
+    return true;
+  }
+
+  showDiscoveryToast(building) {
+    let toast = document.getElementById('rpg-discovery-toast');
+    if (!toast) {
+      toast = document.createElement('div');
+      toast.id = 'rpg-discovery-toast';
+      document.body.appendChild(toast);
+    }
+
+    const count = this.discoveredIds.size;
+    toast.innerHTML = `
+      <div style="position: fixed; top: 88px; left: 50%; transform: translateX(-50%); z-index: 55; width: 92%; max-width: 540px; background: rgba(8, 12, 22, 0.96); backdrop-filter: blur(28px); border: 1.5px solid #00f0ff; border-radius: 12px; box-shadow: 0 20px 60px rgba(0, 0, 0, 0.9), 0 0 30px rgba(0, 240, 255, 0.3); padding: 14px 18px; display: flex; align-items: flex-start; gap: 14px; animation: toast-drop 0.3s cubic-bezier(0.16, 1, 0.3, 1);">
+        <div style="width: 42px; height: 42px; border-radius: 10px; background: rgba(0, 240, 255, 0.15); border: 1px solid #00f0ff; display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0;">
+          ✨
+        </div>
+        <div style="flex: 1;">
+          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 2px;">
+            <span style="font-size: 10px; font-weight: 700; color: #00f0ff; letter-spacing: 0.05em; font-family: 'JetBrains Mono', monospace;">LANDMARK DISCOVERED</span>
+            <span class="datum-tag" style="border-color: #00f0ff; color: #00f0ff;">${count} / ${this.totalLandmarks}</span>
+          </div>
+          <div style="font-size: 14px; font-weight: 700; color: #ffffff;">${building.name}</div>
+          <div style="font-size: 11.5px; color: #94a3b8; margin-top: 2px;">${building.summary}</div>
+          <div style="margin-top: 10px; display: flex; align-items: center; gap: 8px;">
+            <button id="toast-view-dossier" class="action-btn-primary" style="padding: 4px 10px; font-size: 11px;">
+              Open Technical Dossier
+            </button>
+            <span style="font-size: 11px; color: #64748b; font-family: 'JetBrains Mono', monospace;">Press [E] anytime</span>
+          </div>
+        </div>
+      </div>
+    `;
+
+    const btn = toast.querySelector('#toast-view-dossier');
+    if (btn) {
+      btn.onclick = () => {
+        toast.remove();
+        if (this.onOpenDossier) this.onOpenDossier(building);
+      };
+    }
+
+    if (this.toastTimer) clearTimeout(this.toastTimer);
+    this.toastTimer = setTimeout(() => {
+      if (toast && toast.parentNode) toast.remove();
+    }, 5500);
+  }
+
+  show() {
+    this.container.classList.remove('hidden');
+    this.render();
+    sfx.openModal();
+  }
+
+  hide() {
+    this.container.classList.add('hidden');
+    sfx.closeModal();
+  }
+
+  render() {
+    const total = this.totalLandmarks;
+    const discovered = this.discoveredIds.size;
+    const pct = Math.round((discovered / total) * 100);
+
+    // Group buildings by district
+    const districts = [
+      { id: 'metadata', name: '1. Metadata Citadel', color: '#38bdf8' },
+      { id: 'automation', name: '2. Logic & Automation Grid', color: '#f59e0b' },
+      { id: 'semantic', name: '3. Data Cloud & Semantic Harbor', color: '#06b6d4' },
+      { id: 'headless', name: '4. Headless 360 Skyport', color: '#10b981' },
+      { id: 'agentforce', name: '5. Agentforce Autonomous Forum', color: '#a855f7' },
+      { id: 'claudeforce', name: '6. Claudeforce Research Complex', color: '#f97316' },
+      { id: 'mcp', name: '7. Dual-Plane MCP Interchange', color: '#ec4899' }
+    ];
+
+    this.container.innerHTML = `
+      <div class="modal-overlay">
+        <div class="modal-window" style="max-width: 960px; height: 86vh;">
+          
+          <!-- Header -->
+          <div style="padding: 16px 24px; border-bottom: 1px solid rgba(255, 255, 255, 0.08); background: rgba(8, 12, 22, 0.95); display: flex; align-items: center; justify-content: space-between;">
+            <div style="display: flex; align-items: center; gap: 12px;">
+              <span style="font-size: 24px;">📖</span>
+              <div>
+                <h1 style="margin: 0; font-size: 16px; font-weight: 700; color: #ffffff;">SALESFORCE ARCHITECTURAL FIELD GUIDE</h1>
+                <p style="margin: 2px 0 0; font-size: 12px; color: #94a3b8; font-family: 'JetBrains Mono', monospace;">
+                  DISCOVERED ${discovered} OF ${total} LANDMARKS (${pct}%)
+                </p>
+              </div>
+            </div>
+            <button id="btn-close-guide" class="action-btn-ghost" style="padding: 6px 12px;">✕ Close</button>
+          </div>
+
+          <!-- Overall Progress Bar -->
+          <div style="padding: 12px 24px; background: rgba(5, 8, 16, 0.6); border-bottom: 1px solid rgba(255, 255, 255, 0.06);">
+            <div style="height: 6px; border-radius: 3px; background: rgba(255, 255, 255, 0.1); overflow: hidden;">
+              <div style="height: 100%; width: ${pct}%; background: linear-gradient(90deg, #0284c7 0%, #00f0ff 100%); transition: width 0.4s ease;"></div>
+            </div>
+          </div>
+
+          <!-- District Entries Grid -->
+          <div style="flex: 1; overflow-y: auto; padding: 24px; display: flex; flex-direction: column; gap: 20px;">
+            ${districts.map(d => {
+              const districtBuildings = this.catalog.buildings.filter(b => b.districtId === d.id);
+              const districtDiscovered = districtBuildings.filter(b => this.discoveredIds.has(b.id)).length;
+
+              return `
+                <div class="arch-card" style="border-left: 4px solid ${d.color};">
+                  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                    <span style="font-weight: 700; font-size: 14px; color: ${d.color};">${d.name}</span>
+                    <span class="datum-tag">${districtDiscovered} / ${districtBuildings.length} Discovered</span>
+                  </div>
+
+                  <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 10px;">
+                    ${districtBuildings.map(b => {
+                      const isFound = this.discoveredIds.has(b.id);
+                      if (isFound) {
+                        return `
+                          <div style="padding: 10px 12px; border-radius: 8px; background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(255, 255, 255, 0.08); display: flex; flex-direction: column; justify-content: space-between; gap: 8px;">
+                            <div>
+                              <div style="font-weight: 600; font-size: 12.5px; color: #ffffff;">✓ ${b.name}</div>
+                              <div style="font-size: 11px; color: #94a3b8; margin-top: 2px;">${b.subtitle}</div>
+                            </div>
+                            <div style="display: flex; gap: 6px; margin-top: 4px;">
+                              <button class="btn-dossier action-btn-ghost" data-id="${b.id}" style="padding: 3px 8px; font-size: 10px;">
+                                Dossier
+                              </button>
+                              <button class="btn-fast-travel action-btn-primary" data-id="${b.id}" style="padding: 3px 8px; font-size: 10px;">
+                                ✈️ Travel
+                              </button>
+                            </div>
+                          </div>
+                        `;
+                      } else {
+                        return `
+                          <div style="padding: 10px 12px; border-radius: 8px; background: rgba(0, 0, 0, 0.25); border: 1px dashed rgba(255, 255, 255, 0.1); display: flex; align-items: center; gap: 10px;">
+                            <span style="font-size: 18px; opacity: 0.3;">❓</span>
+                            <div>
+                              <div style="font-size: 12px; font-weight: 600; color: #64748b;">??? (Undiscovered)</div>
+                              <div style="font-size: 10.5px; color: #475569;">Explore the ${d.name.split(' ')[1]} zone</div>
+                            </div>
+                          </div>
+                        `;
+                      }
+                    }).join('')}
+                  </div>
+                </div>
+              `;
+            }).join('')}
+          </div>
+
+          <!-- Footer -->
+          <div style="padding: 12px 24px; border-top: 1px solid rgba(255, 255, 255, 0.08); background: rgba(8, 12, 22, 0.95); display: flex; justify-content: flex-end;">
+            <button id="btn-close-guide-footer" class="action-btn-primary" style="padding: 6px 14px; font-size: 11.5px;">Return to World</button>
+          </div>
+        </div>
+      </div>
+    `;
+
+    this.container.querySelector('#btn-close-guide').onclick = () => this.hide();
+    this.container.querySelector('#btn-close-guide-footer').onclick = () => this.hide();
+    this.container.querySelector('.modal-overlay').onclick = (e) => {
+      if (e.target.classList.contains('modal-overlay')) this.hide();
+    };
+
+    this.container.querySelectorAll('.btn-fast-travel').forEach(btn => {
+      btn.onclick = () => {
+        const id = btn.dataset.id;
+        const b = this.catalog.buildings.find(item => item.id === id);
+        this.hide();
+        if (b && this.onFastTravel) {
+          this.onFastTravel(b);
+        }
+      };
+    });
+
+    this.container.querySelectorAll('.btn-dossier').forEach(btn => {
+      btn.onclick = () => {
+        const id = btn.dataset.id;
+        const b = this.catalog.buildings.find(item => item.id === id);
+        this.hide();
+        if (b && this.onOpenDossier) {
+          this.onOpenDossier(b);
+        }
+      };
+    });
+  }
+}
+
+  /**
+ * Atlas.js - Dual-Layer Viewport Coordinator
+ * Bridges the "Explore" RPG Town Layer and the "Atlas" 2.5D Axonometric Architecture Layer.
+ * Manages mode switching, camera transitions, relationship conduits in RPG space,
+ * and fast-travel coordinates.
+ */
+
+
+
+class AtlasCoordinator {
+  constructor({
+    canvas,
+    topDownWorld,
+    player,
+    isoCanvas,
+    inspector,
+    fieldGuide,
+    onModeChange
+  }) {
+    this.canvas = canvas;
+    this.ctx = canvas.getContext('2d');
+    this.topDownWorld = topDownWorld;
+    this.player = player;
+    this.isoCanvas = isoCanvas;
+    this.inspector = inspector;
+    this.fieldGuide = fieldGuide;
+    this.onModeChange = onModeChange;
+
+    // Modes: 'explore' (RPG Town) or 'atlas' (2.5D Axonometric)
+    this.currentMode = 'explore';
+    this.showConduits = true;
+
+    // RPG Camera (smooth lerp follow player)
+    this.rpgCamera = {
+      x: player.x,
+      y: player.y,
+      zoom: 1.35
+    };
+
+    this.bindEvents();
+  }
+
+  setMode(newMode) {
+    if (this.currentMode === newMode) return;
+    this.currentMode = newMode;
+    sfx.openModal();
+
+    if (newMode === 'atlas') {
+      // Sync isometric camera to player's current grid position
+      const gridX = Math.round(this.player.x / 40);
+      const gridY = Math.round(this.player.y / 40);
+      const centerScreen = this.isoCanvas.gridToScreen(gridX, gridY);
+      this.isoCanvas.camera.targetX = this.isoCanvas.width / 2 - centerScreen.x * this.isoCanvas.camera.targetZoom;
+      this.isoCanvas.camera.targetY = this.isoCanvas.height / 2 - (centerScreen.y - 100) * this.isoCanvas.camera.targetZoom;
+    } else {
+      // Sync player near selected isometric building if any
+      if (this.isoCanvas.selectedBuilding) {
+        const b = this.topDownWorld.buildings.find(item => item.id === this.isoCanvas.selectedBuilding.id);
+        if (b) {
+          this.player.teleport(b.entranceX, b.entranceY);
+        }
+      }
+    }
+
+    if (this.onModeChange) {
+      this.onModeChange(this.currentMode);
+    }
+  }
+
+  toggleMode() {
+    this.setMode(this.currentMode === 'explore' ? 'atlas' : 'explore');
+  }
+
+  fastTravel(building) {
+    if (this.currentMode === 'explore') {
+      this.player.teleport(building.entranceX, building.entranceY);
+      this.rpgCamera.x = building.entranceX;
+      this.rpgCamera.y = building.entranceY;
+      sfx.pulse();
+      // Discover if not already
+      this.fieldGuide.discover(building);
+      this.inspector.show(building);
+    } else {
+      this.isoCanvas.focusBuilding(building.id);
+      this.inspector.show(building);
+    }
+  }
+
+  bindEvents() {
+    // Keyboard 'V' to toggle view modes, 'E' to interact with nearby building
+    window.addEventListener('keydown', (e) => {
+      if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+
+      if (e.key === 'v' || e.key === 'V') {
+        this.toggleMode();
+      } else if (e.key === 'e' || e.key === 'E') {
+        if (this.currentMode === 'explore') {
+          const nearby = this.topDownWorld.getNearbyBuilding(this.player.x, this.player.y);
+          if (nearby) {
+            this.fieldGuide.discover(nearby);
+            this.inspector.show(nearby);
+          }
+        }
+      }
+    });
+
+    // Touch / Click on canvas in Explore mode to move toward target
+    this.canvas.addEventListener('click', (e) => {
+      if (this.currentMode !== 'explore') return;
+
+      const rect = this.canvas.getBoundingClientRect();
+      const clickScreenX = e.clientX - rect.left;
+      const clickScreenY = e.clientY - rect.top;
+
+      // Convert screen to world coords
+      const worldX = (clickScreenX - this.canvas.width / (2 * (window.devicePixelRatio || 1))) / this.rpgCamera.zoom + this.rpgCamera.x;
+      const worldY = (clickScreenY - this.canvas.height / (2 * (window.devicePixelRatio || 1))) / this.rpgCamera.zoom + this.rpgCamera.y;
+
+      // Check if clicked near a building entrance
+      const b = this.topDownWorld.buildings.find(item => {
+        return Math.hypot(worldX - item.entranceX, worldY - item.entranceY) < 32;
+      });
+
+      if (b) {
+        this.fastTravel(b);
+      }
+    });
+  }
+
+  update(dt) {
+    if (this.currentMode === 'explore') {
+      // 1. Update Player Movement with collision against TopDownWorld
+      this.player.update(dt, (x, y, w, h) => this.topDownWorld.isColliding(x, y, w, h));
+
+      // 2. Smoothly track camera to player
+      this.rpgCamera.x += (this.player.x - this.rpgCamera.x) * 0.12;
+      this.rpgCamera.y += (this.player.y - this.rpgCamera.y) * 0.12;
+
+      // 3. Check for discovery of nearby landmarks
+      const nearby = this.topDownWorld.getNearbyBuilding(this.player.x, this.player.y, 48);
+      if (nearby) {
+        this.fieldGuide.discover(nearby);
+      }
+    }
+  }
+
+  render(timestamp = 0) {
+    const ctx = this.ctx;
+    const dpr = window.devicePixelRatio || 1;
+    const screenW = this.canvas.width / dpr;
+    const screenH = this.canvas.height / dpr;
+
+    if (this.currentMode === 'explore') {
+      // Clean background
+      ctx.fillStyle = '#060911';
+      ctx.fillRect(0, 0, screenW, screenH);
+
+      ctx.save();
+      // Center camera on player in world space
+      ctx.translate(screenW / 2, screenH / 2);
+      ctx.scale(this.rpgCamera.zoom, this.rpgCamera.zoom);
+      ctx.translate(-this.rpgCamera.x, -this.rpgCamera.y);
+
+      // Viewport bounds in world space
+      const vp = {
+        x: this.rpgCamera.x - (screenW / 2) / this.rpgCamera.zoom,
+        y: this.rpgCamera.y - (screenH / 2) / this.rpgCamera.zoom,
+        width: screenW / this.rpgCamera.zoom,
+        height: screenH / this.rpgCamera.zoom
+      };
+
+      // 1. Render TopDown RPG World (Terrain, Shoreline, Y-Sorted Entities & Player)
+      this.topDownWorld.render(ctx, this.player, vp, timestamp);
+
+      // 2. Render Conduits Overlay in RPG mode if enabled
+      if (this.showConduits) {
+        this.renderRpgConduits(ctx, timestamp);
+      }
+
+      ctx.restore();
+
+      // 3. Screen HUD in RPG Mode (Minimap / Zone indicator)
+      this.renderRpgHud(ctx, screenW, screenH);
+
+    } else {
+      // Render the 2.5D Isometric Architectural Masterplan
+      this.isoCanvas.render(timestamp);
+    }
+  }
+
+  renderRpgConduits(ctx, timestamp) {
+    ctx.save();
+    this.topDownWorld.catalog.conduits.forEach(c => {
+      const b1 = this.topDownWorld.buildings.find(b => b.id === c.from);
+      const b2 = this.topDownWorld.buildings.find(b => b.id === c.to);
+      if (!b1 || !b2) return;
+
+      let strokeColor = 'rgba(56, 189, 248, 0.45)';
+      if (c.type === 'automation') strokeColor = 'rgba(245, 158, 11, 0.45)';
+      if (c.type === 'semantic') strokeColor = 'rgba(6, 182, 212, 0.45)';
+      if (c.type === 'agentforce') strokeColor = 'rgba(168, 85, 247, 0.5)';
+      if (c.type === 'claudeforce') strokeColor = 'rgba(249, 115, 22, 0.5)';
+      if (c.type === 'mcp') strokeColor = 'rgba(236, 72, 153, 0.5)';
+      if (c.type === 'headless') strokeColor = 'rgba(16, 185, 129, 0.5)';
+
+      // Draw dashed energy conduit between building entrances
+      ctx.beginPath();
+      ctx.moveTo(b1.entranceX, b1.entranceY);
+      ctx.lineTo(b2.entranceX, b2.entranceY);
+      ctx.strokeStyle = strokeColor;
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+
+      // Discrete data pulse traveling along conduit
+      ctx.setLineDash([4, 12]);
+      ctx.lineDashOffset = -timestamp * 0.035;
+      ctx.strokeStyle = '#ffffff';
+      ctx.lineWidth = 2;
+      ctx.stroke();
+      ctx.setLineDash([]);
+    });
+    ctx.restore();
+  }
+
+  renderRpgHud(ctx, screenW, screenH) {
+    // Current District Badge at bottom-left
+    const currentDistrict = this.getCurrentDistrict();
+    ctx.save();
+
+    // Zone Pill
+    ctx.fillStyle = 'rgba(8, 12, 22, 0.85)';
+    ctx.strokeStyle = currentDistrict.color;
+    ctx.lineWidth = 1.2;
+
+    const pillW = 220;
+    const pillH = 34;
+    const pillX = 20;
+    const pillY = screenH - 72;
+
+    ctx.beginPath();
+    ctx.roundRect(pillX, pillY, pillW, pillH, 8);
+    ctx.fill();
+    ctx.stroke();
+
+    ctx.fillStyle = currentDistrict.color;
+    ctx.font = '700 9px JetBrains Mono, monospace';
+    ctx.fillText('ZONE: ' + currentDistrict.id.toUpperCase(), pillX + 12, pillY + 14);
+
+    ctx.fillStyle = '#ffffff';
+    ctx.font = '600 11.5px Plus Jakarta Sans, sans-serif';
+    ctx.fillText(currentDistrict.name, pillX + 12, pillY + 27);
+
+    ctx.restore();
+  }
+
+  getCurrentDistrict() {
+    const gx = Math.floor(this.player.x / 40);
+    const gy = Math.floor(this.player.y / 40);
+
+    if (gx <= 8 && gy <= 8) return { id: 'metadata', name: 'Metadata Citadel', color: '#38bdf8' };
+    if (gx >= 9 && gx <= 16 && gy <= 8) return { id: 'automation', name: 'Logic & Automation Grid', color: '#f59e0b' };
+    if (gx >= 17 && gy <= 9) return { id: 'semantic', name: 'Data Cloud & Semantic Harbor', color: '#06b6d4' };
+    if (gx <= 8 && gy >= 13) return { id: 'headless', name: 'Headless 360 Skyport', color: '#10b981' };
+    if (gx >= 9 && gx <= 15 && gy >= 9 && gy <= 16) return { id: 'agentforce', name: 'Agentforce Autonomous Forum', color: '#a855f7' };
+    if (gx >= 16 && gx <= 20 && gy >= 10 && gy <= 15) return { id: 'claudeforce', name: 'Claudeforce Research Complex', color: '#f97316' };
+    if (gx >= 15 && gy >= 16) return { id: 'mcp', name: 'Dual-Plane MCP Interchange', color: '#ec4899' };
+
+    return { id: 'commons', name: 'Salesforce Metropolitan Commons', color: '#94a3b8' };
+  }
 }
 
   
@@ -4255,31 +6117,92 @@ class SimulationController {
 
 
 
+
+
+
+
 document.addEventListener('DOMContentLoaded', () => {
   const canvasEl = document.getElementById('city-canvas');
   const inspectorContainer = document.getElementById('building-inspector');
   const modalContainer = document.getElementById('concept-modal');
   const paletteContainer = document.getElementById('command-palette-modal');
   const tourContainer = document.getElementById('guided-tour-container');
+  const guideContainer = document.getElementById('field-guide-modal');
   const simContainer = document.getElementById('simulation-controller-container');
   const shortcutsContainer = document.getElementById('shortcuts-modal');
 
+  // Core Engines
   const particleSystem = new ParticleSystem();
   const isoCanvas = new IsometricCanvas(canvasEl, METADATA_CATALOG, particleSystem);
+  const topDownWorld = new TopDownWorld(METADATA_CATALOG);
+  const player = new PlayerCharacter(420, 420); // Central transit intersection // Starts at Agentforce Central Plaza
 
+  // UI Components
   const inspector = new BuildingInspector(inspectorContainer, (building) => {
     handleBuildingAction(building, isoCanvas, particleSystem);
   });
 
   const conceptModal = new ConceptModal(modalContainer);
 
+  const fieldGuide = new FieldGuide(
+    guideContainer,
+    METADATA_CATALOG,
+    (building) => {
+      atlasCoordinator.fastTravel(building);
+    },
+    (building) => {
+      inspector.show(building);
+    }
+  );
+
+  // Update initial guide badge count
+  const updateGuideBadge = (count, total) => {
+    const badge = document.getElementById('guide-badge');
+    if (badge) badge.innerText = `Guide (${count}/${total})`;
+  };
+  fieldGuide.onDiscoveryChange = updateGuideBadge;
+  updateGuideBadge(fieldGuide.discoveredIds.size, fieldGuide.totalLandmarks);
+
+  // Dual-Mode Atlas Coordinator
+  const atlasCoordinator = new AtlasCoordinator({
+    canvas: canvasEl,
+    topDownWorld,
+    player,
+    isoCanvas,
+    inspector,
+    fieldGuide,
+    onModeChange: (mode) => {
+      const btnExplore = document.getElementById('btn-mode-explore');
+      const btnAtlas = document.getElementById('btn-mode-atlas');
+      const draftingGrid = document.querySelector('.drafting-grid');
+      const programSelector = document.querySelector('.program-selector');
+
+      if (mode === 'explore') {
+        btnExplore.classList.add('active');
+        btnAtlas.classList.remove('active');
+        if (draftingGrid) draftingGrid.style.display = 'none';
+        if (programSelector) programSelector.style.display = 'none';
+      } else {
+        btnExplore.classList.remove('active');
+        btnAtlas.classList.add('active');
+        if (draftingGrid) draftingGrid.style.display = 'block';
+        if (programSelector) programSelector.style.display = 'flex';
+      }
+    }
+  });
+
+  // Initial UI state setup for explore mode
+  const draftingGrid = document.querySelector('.drafting-grid');
+  const programSelector = document.querySelector('.program-selector');
+  if (draftingGrid) draftingGrid.style.display = 'none';
+  if (programSelector) programSelector.style.display = 'none';
+
   const commandPalette = new CommandPalette(
     paletteContainer,
     METADATA_CATALOG,
     (buildingId) => {
-      isoCanvas.focusBuilding(buildingId);
       const b = METADATA_CATALOG.buildings.find(item => item.id === buildingId);
-      if (b) inspector.show(b);
+      if (b) atlasCoordinator.fastTravel(b);
     },
     (conceptId) => {
       conceptModal.show(conceptId);
@@ -4292,29 +6215,25 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const simController = new SimulationController(simContainer, isoCanvas, particleSystem);
 
-  // Hook building selection on canvas click
-  isoCanvas.onBuildingSelected = (building) => {
-    inspector.show(building);
-  };
-
-  // Wire up Program / Layer Filter segmented buttons
-  document.querySelectorAll('.filter-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-      document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-
-      const filter = btn.dataset.filter;
-      isoCanvas.activeFilter = filter;
-      sfx.districtSelect();
-    });
+  // Mode Switcher Buttons
+  document.getElementById('btn-mode-explore').addEventListener('click', () => {
+    atlasCoordinator.setMode('explore');
+  });
+  document.getElementById('btn-mode-atlas').addEventListener('click', () => {
+    atlasCoordinator.setMode('atlas');
   });
 
-  // Top Action Buttons
+  // Header Action Buttons
+  document.getElementById('btn-open-guide').addEventListener('click', () => {
+    fieldGuide.show();
+  });
+
   document.getElementById('btn-open-search').addEventListener('click', () => {
     commandPalette.open();
   });
 
   document.getElementById('btn-start-tour').addEventListener('click', () => {
+    atlasCoordinator.setMode('atlas');
     guidedTour.start(0);
   });
 
@@ -4326,15 +6245,6 @@ document.addEventListener('DOMContentLoaded', () => {
     simController.start();
   });
 
-  const calloutBtn = document.getElementById('btn-toggle-callouts');
-  if (calloutBtn) {
-    calloutBtn.addEventListener('click', () => {
-      isoCanvas.showCallouts = !isoCanvas.showCallouts;
-      calloutBtn.style.color = isoCanvas.showCallouts ? '#38bdf8' : '#64748b';
-      sfx.click();
-    });
-  }
-
   document.getElementById('btn-shortcuts').addEventListener('click', () => {
     toggleShortcutsModal(shortcutsContainer);
   });
@@ -4344,22 +6254,56 @@ document.addEventListener('DOMContentLoaded', () => {
     e.target.innerHTML = isMuted ? '🔇' : '🔊';
   });
 
-  document.getElementById('btn-center-camera').addEventListener('click', () => {
-    isoCanvas.centerCamera();
-    sfx.click();
-  });
-
-  // Quick Zone Jump buttons in bottom dock
-  document.querySelectorAll('.district-jump-btn').forEach(btn => {
+  // District Filter Buttons (Atlas Mode)
+  document.querySelectorAll('.filter-btn').forEach(btn => {
     btn.addEventListener('click', () => {
-      const targetBuildingId = btn.dataset.target;
-      isoCanvas.focusBuilding(targetBuildingId);
-      const b = METADATA_CATALOG.buildings.find(item => item.id === targetBuildingId);
-      if (b) inspector.show(b);
+      document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      isoCanvas.activeFilter = btn.dataset.filter;
+      sfx.districtSelect();
     });
   });
 
-  // District Quick Jump Map
+  // Fast Travel Dock Buttons
+  document.querySelectorAll('.district-jump-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const targetBuildingId = btn.dataset.target;
+      const b = METADATA_CATALOG.buildings.find(item => item.id === targetBuildingId);
+      if (b) atlasCoordinator.fastTravel(b);
+    });
+  });
+
+  // Mobile Virtual D-Pad Inputs
+  const bindTouch = (id, direction) => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    const start = (e) => { e.preventDefault(); player.keys[direction] = true; };
+    const end = (e) => { e.preventDefault(); player.keys[direction] = false; };
+    el.addEventListener('touchstart', start, { passive: false });
+    el.addEventListener('touchend', end, { passive: false });
+    el.addEventListener('mousedown', start);
+    el.addEventListener('mouseup', end);
+  };
+  bindTouch('dpad-up', 'up');
+  bindTouch('dpad-down', 'down');
+  bindTouch('dpad-left', 'left');
+  bindTouch('dpad-right', 'right');
+
+  const mobileActionBtn = document.getElementById('mobile-btn-action');
+  if (mobileActionBtn) {
+    const triggerAction = (e) => {
+      e.preventDefault();
+      const nearby = topDownWorld.getNearbyBuilding(player.x, player.y);
+      if (nearby) {
+        fieldGuide.discover(nearby);
+        inspector.show(nearby);
+      }
+    };
+    mobileActionBtn.addEventListener('touchstart', triggerAction, { passive: false });
+    mobileActionBtn.addEventListener('click', triggerAction);
+  }
+
+  // Keyboard Navigation Shortcuts
   const districtJumps = {
     '1': 'b_standard_objects',
     '2': 'b_apex_foundry',
@@ -4370,13 +6314,15 @@ document.addEventListener('DOMContentLoaded', () => {
     '7': 'b_mcp_context'
   };
 
-  // Global Keyboard Shortcuts
   window.addEventListener('keydown', (e) => {
-    // Ignore input focus
     if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
 
-    if (e.key === 't' || e.key === 'T') {
-      e.preventDefault();
+    if (e.key === 'g' || e.key === 'G') {
+      fieldGuide.show();
+    } else if (e.key === 'v' || e.key === 'V') {
+      atlasCoordinator.toggleMode();
+    } else if (e.key === 't' || e.key === 'T') {
+      atlasCoordinator.setMode('atlas');
       if (guidedTour.isActive) {
         guidedTour.stop();
       } else {
@@ -4390,11 +6336,8 @@ document.addEventListener('DOMContentLoaded', () => {
       toggleShortcutsModal(shortcutsContainer);
     } else if (districtJumps[e.key]) {
       const bId = districtJumps[e.key];
-      isoCanvas.focusBuilding(bId);
       const b = METADATA_CATALOG.buildings.find(item => item.id === bId);
-      if (b) inspector.show(b);
-    } else if (e.key === 'c' || e.key === 'C') {
-      isoCanvas.centerCamera();
+      if (b) atlasCoordinator.fastTravel(b);
     } else if (e.key === 'm' || e.key === 'M') {
       const isMuted = sfx.toggleMute();
       const soundBtn = document.getElementById('btn-toggle-sound');
@@ -4404,22 +6347,27 @@ document.addEventListener('DOMContentLoaded', () => {
       if (!shortcutsContainer.classList.contains('hidden')) shortcutsContainer.classList.add('hidden');
       if (!modalContainer.classList.contains('hidden')) conceptModal.hide();
       if (!inspectorContainer.classList.contains('hidden')) inspector.hide();
+      if (!guideContainer.classList.contains('hidden')) fieldGuide.hide();
       if (!simContainer.classList.contains('hidden')) simController.stop();
     }
   });
 
-  // Animation Loop
+  // Main Unified Animation Loop
   let lastTime = performance.now();
-  function loop(currentTime) {
-    const delta = currentTime - lastTime;
+  function gameLoop(currentTime) {
+    const dt = Math.min(0.1, (currentTime - lastTime) / 1000);
     lastTime = currentTime;
 
-    particleSystem.update(delta);
-    isoCanvas.render(currentTime);
+    // Update particles and dual-mode coordinator
+    particleSystem.update(dt * 1000);
+    atlasCoordinator.update(dt);
 
-    requestAnimationFrame(loop);
+    // Render active mode
+    atlasCoordinator.render(currentTime);
+
+    requestAnimationFrame(gameLoop);
   }
-  requestAnimationFrame(loop);
+  requestAnimationFrame(gameLoop);
 });
 
 function toggleShortcutsModal(container) {
@@ -4434,43 +6382,51 @@ function toggleShortcutsModal(container) {
 
   container.innerHTML = `
     <div class="modal-overlay">
-      <div class="modal-window" style="max-width: 580px; height: auto;">
+      <div class="modal-window" style="max-width: 600px; height: auto;">
         <div style="padding: 16px 20px; border-bottom: 1px solid rgba(255, 255, 255, 0.08); background: rgba(8, 12, 22, 0.9); display: flex; align-items: center; justify-content: space-between;">
           <div style="display: flex; align-items: center; gap: 10px;">
             <span style="font-size: 18px;">⌨️</span>
-            <span style="font-size: 14px; font-weight: 700; color: #ffffff;">Keyboard Shortcuts & Navigation</span>
+            <span style="font-size: 14px; font-weight: 700; color: #ffffff;">Keyboard Navigation & RPG Controls</span>
           </div>
           <button id="btn-close-shortcuts" class="action-btn-ghost" style="padding: 4px 8px; font-size: 12px;">✕</button>
         </div>
 
-        <div style="padding: 20px; display: flex; flex-direction: column; gap: 12px; font-size: 12.5px;">
+        <div style="padding: 20px; display: flex; flex-direction: column; gap: 12px; font-size: 12px;">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <span style="color: #cbd5e1;">Move Explorer (Explore Mode)</span>
+            <span class="datum-tag" style="color: #00f0ff; border-color: #00f0ff;">W A S D / Arrows</span>
+          </div>
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <span style="color: #cbd5e1;">Interact with Landmark / Open Dossier</span>
+            <span class="datum-tag" style="color: #00f0ff; border-color: #00f0ff;">E</span>
+          </div>
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <span style="color: #cbd5e1;">Toggle Mode (Explore RPG ↔ Atlas Masterplan)</span>
+            <span class="datum-tag" style="color: #38bdf8; border-color: #38bdf8;">V</span>
+          </div>
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <span style="color: #cbd5e1;">Open Architectural Field Guide</span>
+            <span class="datum-tag" style="color: #38bdf8; border-color: #38bdf8;">G</span>
+          </div>
           <div style="display: flex; justify-content: space-between; align-items: center;">
             <span style="color: #cbd5e1;">Universal Search & Command Palette</span>
             <span class="datum-tag" style="color: #00f0ff; border-color: #00f0ff;">⌘K / Ctrl+K</span>
           </div>
           <div style="display: flex; justify-content: space-between; align-items: center;">
-            <span style="color: #cbd5e1;">Start / Stop Guided Architectural Tour</span>
-            <span class="datum-tag" style="color: #38bdf8; border-color: #38bdf8;">T</span>
+            <span style="color: #cbd5e1;">Start / Stop Guided Tour</span>
+            <span class="datum-tag" style="color: #10b981; border-color: #10b981;">T</span>
           </div>
           <div style="display: flex; justify-content: space-between; align-items: center;">
-            <span style="color: #cbd5e1;">Play / Pause Interactive Simulation</span>
+            <span style="color: #cbd5e1;">Play / Pause Simulation</span>
             <span class="datum-tag" style="color: #10b981; border-color: #10b981;">Space</span>
           </div>
           <div style="display: flex; justify-content: space-between; align-items: center;">
-            <span style="color: #cbd5e1;">Quick-Jump to Districts (1 to 7)</span>
+            <span style="color: #cbd5e1;">Fast Travel to Districts (1 to 7)</span>
             <span class="datum-tag" style="color: #a855f7; border-color: #a855f7;">1 - 7</span>
           </div>
           <div style="display: flex; justify-content: space-between; align-items: center;">
-            <span style="color: #cbd5e1;">Center Camera on Masterplan</span>
-            <span class="datum-tag" style="color: #f59e0b; border-color: #f59e0b;">C</span>
-          </div>
-          <div style="display: flex; justify-content: space-between; align-items: center;">
-            <span style="color: #cbd5e1;">Toggle Procedural Audio FX</span>
+            <span style="color: #cbd5e1;">Toggle Sound Effects</span>
             <span class="datum-tag" style="color: #f97316; border-color: #f97316;">M</span>
-          </div>
-          <div style="display: flex; justify-content: space-between; align-items: center;">
-            <span style="color: #cbd5e1;">Close Any Modal / Panel</span>
-            <span class="datum-tag">Esc</span>
           </div>
         </div>
 
@@ -4519,6 +6475,6 @@ function handleBuildingAction(building, isoCanvas, particleSystem) {
 
 })();
 
-  </script>
+</script>
 </body>
 </html>

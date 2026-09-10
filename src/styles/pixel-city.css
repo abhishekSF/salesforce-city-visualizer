@@ -435,3 +435,148 @@ code {
 .palette-item:hover {
   background: rgba(56, 189, 248, 0.08);
 }
+
+/* ==========================================================================
+   RPG World & Dual-Layer Mode Styling
+   ========================================================================== */
+
+@keyframes toast-drop {
+  from { transform: translate(-50%, -30px); opacity: 0; }
+  to { transform: translate(-50%, 0); opacity: 1; }
+}
+
+/* View Mode Segmented Switcher */
+.view-mode-segmented {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  background: rgba(8, 12, 22, 0.9);
+  padding: 3px;
+  border-radius: 8px;
+  border: 1px solid var(--ui-border);
+}
+
+.view-mode-btn {
+  padding: 6px 14px;
+  border-radius: 6px;
+  font-size: 11.5px;
+  font-weight: 700;
+  color: var(--text-secondary);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  font-family: var(--font-sans);
+  white-space: nowrap;
+}
+
+.view-mode-btn.active {
+  color: #ffffff;
+  background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+  border: 1px solid rgba(56, 189, 248, 0.4);
+  box-shadow: 0 0 12px rgba(2, 132, 199, 0.4);
+}
+
+/* Mobile Virtual Controls (On-Screen D-Pad & Action Button) */
+.mobile-controls {
+  display: none;
+  position: absolute;
+  bottom: 80px;
+  left: 20px;
+  right: 20px;
+  z-index: 30;
+  pointer-events: none;
+  justify-content: space-between;
+  align-items: flex-end;
+}
+
+.dpad-container {
+  pointer-events: auto;
+  display: grid;
+  grid-template-columns: repeat(3, 44px);
+  grid-template-rows: repeat(3, 44px);
+  gap: 4px;
+  background: rgba(8, 12, 22, 0.7);
+  backdrop-filter: blur(12px);
+  padding: 6px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.dpad-btn {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 8px;
+  color: #ffffff;
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: manipulation;
+}
+
+.dpad-btn:active {
+  background: rgba(56, 189, 248, 0.35);
+  border-color: #00f0ff;
+}
+
+.mobile-action-btn {
+  pointer-events: auto;
+  width: 58px;
+  height: 58px;
+  border-radius: 29px;
+  background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+  border: 2px solid #00f0ff;
+  color: #ffffff;
+  font-weight: 700;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.6), 0 0 16px rgba(0, 240, 255, 0.35);
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: manipulation;
+}
+
+.mobile-action-btn:active {
+  transform: scale(0.92);
+  box-shadow: 0 0 24px #00f0ff;
+}
+
+/* Responsive Overrides */
+@media (max-width: 900px) {
+  .program-selector {
+    display: none;
+  }
+}
+
+@media (max-width: 768px) {
+  .arch-header {
+    top: 10px;
+    left: 10px;
+    right: 10px;
+    padding: 8px 12px;
+  }
+  
+  .arch-dock {
+    bottom: 10px;
+    left: 10px;
+    right: 10px;
+    padding: 6px 12px;
+    font-size: 10px;
+  }
+
+  .mobile-controls {
+    display: flex;
+  }
+
+  #building-inspector {
+    top: 60px;
+    right: 10px;
+    bottom: 50px;
+    width: calc(100vw - 20px);
+  }
+}

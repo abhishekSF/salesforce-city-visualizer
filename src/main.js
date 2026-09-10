@@ -1,10 +1,14 @@
 import { METADATA_CATALOG } from './data/metadataCatalog.js';
 import { ParticleSystem } from './engine/ParticleSystem.js';
 import { IsometricCanvas } from './engine/IsometricCanvas.js';
+import { TopDownWorld } from './engine/TopDownWorld.js';
+import { PlayerCharacter } from './engine/PlayerCharacter.js';
 import { BuildingInspector } from './components/BuildingInspector.js';
 import { ConceptModal } from './components/ConceptModal.js';
 import { CommandPalette } from './components/CommandPalette.js';
 import { GuidedTour } from './components/GuidedTour.js';
+import { FieldGuide } from './components/FieldGuide.js';
+import { AtlasCoordinator } from './components/Atlas.js';
 import { SimulationController } from './components/SimulationController.js';
 import { sfx } from './engine/SoundFx.js';
 
@@ -14,25 +18,82 @@ document.addEventListener('DOMContentLoaded', () => {
   const modalContainer = document.getElementById('concept-modal');
   const paletteContainer = document.getElementById('command-palette-modal');
   const tourContainer = document.getElementById('guided-tour-container');
+  const guideContainer = document.getElementById('field-guide-modal');
   const simContainer = document.getElementById('simulation-controller-container');
   const shortcutsContainer = document.getElementById('shortcuts-modal');
 
+  // Core Engines
   const particleSystem = new ParticleSystem();
   const isoCanvas = new IsometricCanvas(canvasEl, METADATA_CATALOG, particleSystem);
+  const topDownWorld = new TopDownWorld(METADATA_CATALOG);
+  const player = new PlayerCharacter(420, 420); // Central transit intersection // Starts at Agentforce Central Plaza
 
+  // UI Components
   const inspector = new BuildingInspector(inspectorContainer, (building) => {
     handleBuildingAction(building, isoCanvas, particleSystem);
   });
 
   const conceptModal = new ConceptModal(modalContainer);
 
+  const fieldGuide = new FieldGuide(
+    guideContainer,
+    METADATA_CATALOG,
+    (building) => {
+      atlasCoordinator.fastTravel(building);
+    },
+    (building) => {
+      inspector.show(building);
+    }
+  );
+
+  // Update initial guide badge count
+  const updateGuideBadge = (count, total) => {
+    const badge = document.getElementById('guide-badge');
+    if (badge) badge.innerText = `Guide (${count}/${total})`;
+  };
+  fieldGuide.onDiscoveryChange = updateGuideBadge;
+  updateGuideBadge(fieldGuide.discoveredIds.size, fieldGuide.totalLandmarks);
+
+  // Dual-Mode Atlas Coordinator
+  const atlasCoordinator = new AtlasCoordinator({
+    canvas: canvasEl,
+    topDownWorld,
+    player,
+    isoCanvas,
+    inspector,
+    fieldGuide,
+    onModeChange: (mode) => {
+      const btnExplore = document.getElementById('btn-mode-explore');
+      const btnAtlas = document.getElementById('btn-mode-atlas');
+      const draftingGrid = document.querySelector('.drafting-grid');
+      const programSelector = document.querySelector('.program-selector');
+
+      if (mode === 'explore') {
+        btnExplore.classList.add('active');
+        btnAtlas.classList.remove('active');
+        if (draftingGrid) draftingGrid.style.display = 'none';
+        if (programSelector) programSelector.style.display = 'none';
+      } else {
+        btnExplore.classList.remove('active');
+        btnAtlas.classList.add('active');
+        if (draftingGrid) draftingGrid.style.display = 'block';
+        if (programSelector) programSelector.style.display = 'flex';
+      }
+    }
+  });
+
+  // Initial UI state setup for explore mode
+  const draftingGrid = document.querySelector('.drafting-grid');
+  const programSelector = document.querySelector('.program-selector');
+  if (draftingGrid) draftingGrid.style.display = 'none';
+  if (programSelector) programSelector.style.display = 'none';
+
   const commandPalette = new CommandPalette(
     paletteContainer,
     METADATA_CATALOG,
     (buildingId) => {
-      isoCanvas.focusBuilding(buildingId);
       const b = METADATA_CATALOG.buildings.find(item => item.id === buildingId);
-      if (b) inspector.show(b);
+      if (b) atlasCoordinator.fastTravel(b);
     },
     (conceptId) => {
       conceptModal.show(conceptId);
@@ -45,29 +106,25 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const simController = new SimulationController(simContainer, isoCanvas, particleSystem);
 
-  // Hook building selection on canvas click
-  isoCanvas.onBuildingSelected = (building) => {
-    inspector.show(building);
-  };
-
-  // Wire up Program / Layer Filter segmented buttons
-  document.querySelectorAll('.filter-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-      document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-
-      const filter = btn.dataset.filter;
-      isoCanvas.activeFilter = filter;
-      sfx.districtSelect();
-    });
+  // Mode Switcher Buttons
+  document.getElementById('btn-mode-explore').addEventListener('click', () => {
+    atlasCoordinator.setMode('explore');
+  });
+  document.getElementById('btn-mode-atlas').addEventListener('click', () => {
+    atlasCoordinator.setMode('atlas');
   });
 
-  // Top Action Buttons
+  // Header Action Buttons
+  document.getElementById('btn-open-guide').addEventListener('click', () => {
+    fieldGuide.show();
+  });
+
   document.getElementById('btn-open-search').addEventListener('click', () => {
     commandPalette.open();
   });
 
   document.getElementById('btn-start-tour').addEventListener('click', () => {
+    atlasCoordinator.setMode('atlas');
     guidedTour.start(0);
   });
 
@@ -79,15 +136,6 @@ document.addEventListener('DOMContentLoaded', () => {
     simController.start();
   });
 
-  const calloutBtn = document.getElementById('btn-toggle-callouts');
-  if (calloutBtn) {
-    calloutBtn.addEventListener('click', () => {
-      isoCanvas.showCallouts = !isoCanvas.showCallouts;
-      calloutBtn.style.color = isoCanvas.showCallouts ? '#38bdf8' : '#64748b';
-      sfx.click();
-    });
-  }
-
   document.getElementById('btn-shortcuts').addEventListener('click', () => {
     toggleShortcutsModal(shortcutsContainer);
   });
@@ -97,22 +145,56 @@ document.addEventListener('DOMContentLoaded', () => {
     e.target.innerHTML = isMuted ? '🔇' : '🔊';
   });
 
-  document.getElementById('btn-center-camera').addEventListener('click', () => {
-    isoCanvas.centerCamera();
-    sfx.click();
-  });
-
-  // Quick Zone Jump buttons in bottom dock
-  document.querySelectorAll('.district-jump-btn').forEach(btn => {
+  // District Filter Buttons (Atlas Mode)
+  document.querySelectorAll('.filter-btn').forEach(btn => {
     btn.addEventListener('click', () => {
-      const targetBuildingId = btn.dataset.target;
-      isoCanvas.focusBuilding(targetBuildingId);
-      const b = METADATA_CATALOG.buildings.find(item => item.id === targetBuildingId);
-      if (b) inspector.show(b);
+      document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      isoCanvas.activeFilter = btn.dataset.filter;
+      sfx.districtSelect();
     });
   });
 
-  // District Quick Jump Map
+  // Fast Travel Dock Buttons
+  document.querySelectorAll('.district-jump-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const targetBuildingId = btn.dataset.target;
+      const b = METADATA_CATALOG.buildings.find(item => item.id === targetBuildingId);
+      if (b) atlasCoordinator.fastTravel(b);
+    });
+  });
+
+  // Mobile Virtual D-Pad Inputs
+  const bindTouch = (id, direction) => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    const start = (e) => { e.preventDefault(); player.keys[direction] = true; };
+    const end = (e) => { e.preventDefault(); player.keys[direction] = false; };
+    el.addEventListener('touchstart', start, { passive: false });
+    el.addEventListener('touchend', end, { passive: false });
+    el.addEventListener('mousedown', start);
+    el.addEventListener('mouseup', end);
+  };
+  bindTouch('dpad-up', 'up');
+  bindTouch('dpad-down', 'down');
+  bindTouch('dpad-left', 'left');
+  bindTouch('dpad-right', 'right');
+
+  const mobileActionBtn = document.getElementById('mobile-btn-action');
+  if (mobileActionBtn) {
+    const triggerAction = (e) => {
+      e.preventDefault();
+      const nearby = topDownWorld.getNearbyBuilding(player.x, player.y);
+      if (nearby) {
+        fieldGuide.discover(nearby);
+        inspector.show(nearby);
+      }
+    };
+    mobileActionBtn.addEventListener('touchstart', triggerAction, { passive: false });
+    mobileActionBtn.addEventListener('click', triggerAction);
+  }
+
+  // Keyboard Navigation Shortcuts
   const districtJumps = {
     '1': 'b_standard_objects',
     '2': 'b_apex_foundry',
@@ -123,13 +205,15 @@ document.addEventListener('DOMContentLoaded', () => {
     '7': 'b_mcp_context'
   };
 
-  // Global Keyboard Shortcuts
   window.addEventListener('keydown', (e) => {
-    // Ignore input focus
     if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
 
-    if (e.key === 't' || e.key === 'T') {
-      e.preventDefault();
+    if (e.key === 'g' || e.key === 'G') {
+      fieldGuide.show();
+    } else if (e.key === 'v' || e.key === 'V') {
+      atlasCoordinator.toggleMode();
+    } else if (e.key === 't' || e.key === 'T') {
+      atlasCoordinator.setMode('atlas');
       if (guidedTour.isActive) {
         guidedTour.stop();
       } else {
@@ -143,11 +227,8 @@ document.addEventListener('DOMContentLoaded', () => {
       toggleShortcutsModal(shortcutsContainer);
     } else if (districtJumps[e.key]) {
       const bId = districtJumps[e.key];
-      isoCanvas.focusBuilding(bId);
       const b = METADATA_CATALOG.buildings.find(item => item.id === bId);
-      if (b) inspector.show(b);
-    } else if (e.key === 'c' || e.key === 'C') {
-      isoCanvas.centerCamera();
+      if (b) atlasCoordinator.fastTravel(b);
     } else if (e.key === 'm' || e.key === 'M') {
       const isMuted = sfx.toggleMute();
       const soundBtn = document.getElementById('btn-toggle-sound');
@@ -157,22 +238,27 @@ document.addEventListener('DOMContentLoaded', () => {
       if (!shortcutsContainer.classList.contains('hidden')) shortcutsContainer.classList.add('hidden');
       if (!modalContainer.classList.contains('hidden')) conceptModal.hide();
       if (!inspectorContainer.classList.contains('hidden')) inspector.hide();
+      if (!guideContainer.classList.contains('hidden')) fieldGuide.hide();
       if (!simContainer.classList.contains('hidden')) simController.stop();
     }
   });
 
-  // Animation Loop
+  // Main Unified Animation Loop
   let lastTime = performance.now();
-  function loop(currentTime) {
-    const delta = currentTime - lastTime;
+  function gameLoop(currentTime) {
+    const dt = Math.min(0.1, (currentTime - lastTime) / 1000);
     lastTime = currentTime;
 
-    particleSystem.update(delta);
-    isoCanvas.render(currentTime);
+    // Update particles and dual-mode coordinator
+    particleSystem.update(dt * 1000);
+    atlasCoordinator.update(dt);
 
-    requestAnimationFrame(loop);
+    // Render active mode
+    atlasCoordinator.render(currentTime);
+
+    requestAnimationFrame(gameLoop);
   }
-  requestAnimationFrame(loop);
+  requestAnimationFrame(gameLoop);
 });
 
 function toggleShortcutsModal(container) {
@@ -187,43 +273,51 @@ function toggleShortcutsModal(container) {
 
   container.innerHTML = `
     <div class="modal-overlay">
-      <div class="modal-window" style="max-width: 580px; height: auto;">
+      <div class="modal-window" style="max-width: 600px; height: auto;">
         <div style="padding: 16px 20px; border-bottom: 1px solid rgba(255, 255, 255, 0.08); background: rgba(8, 12, 22, 0.9); display: flex; align-items: center; justify-content: space-between;">
           <div style="display: flex; align-items: center; gap: 10px;">
             <span style="font-size: 18px;">⌨️</span>
-            <span style="font-size: 14px; font-weight: 700; color: #ffffff;">Keyboard Shortcuts & Navigation</span>
+            <span style="font-size: 14px; font-weight: 700; color: #ffffff;">Keyboard Navigation & RPG Controls</span>
           </div>
           <button id="btn-close-shortcuts" class="action-btn-ghost" style="padding: 4px 8px; font-size: 12px;">✕</button>
         </div>
 
-        <div style="padding: 20px; display: flex; flex-direction: column; gap: 12px; font-size: 12.5px;">
+        <div style="padding: 20px; display: flex; flex-direction: column; gap: 12px; font-size: 12px;">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <span style="color: #cbd5e1;">Move Explorer (Explore Mode)</span>
+            <span class="datum-tag" style="color: #00f0ff; border-color: #00f0ff;">W A S D / Arrows</span>
+          </div>
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <span style="color: #cbd5e1;">Interact with Landmark / Open Dossier</span>
+            <span class="datum-tag" style="color: #00f0ff; border-color: #00f0ff;">E</span>
+          </div>
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <span style="color: #cbd5e1;">Toggle Mode (Explore RPG ↔ Atlas Masterplan)</span>
+            <span class="datum-tag" style="color: #38bdf8; border-color: #38bdf8;">V</span>
+          </div>
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <span style="color: #cbd5e1;">Open Architectural Field Guide</span>
+            <span class="datum-tag" style="color: #38bdf8; border-color: #38bdf8;">G</span>
+          </div>
           <div style="display: flex; justify-content: space-between; align-items: center;">
             <span style="color: #cbd5e1;">Universal Search & Command Palette</span>
             <span class="datum-tag" style="color: #00f0ff; border-color: #00f0ff;">⌘K / Ctrl+K</span>
           </div>
           <div style="display: flex; justify-content: space-between; align-items: center;">
-            <span style="color: #cbd5e1;">Start / Stop Guided Architectural Tour</span>
-            <span class="datum-tag" style="color: #38bdf8; border-color: #38bdf8;">T</span>
+            <span style="color: #cbd5e1;">Start / Stop Guided Tour</span>
+            <span class="datum-tag" style="color: #10b981; border-color: #10b981;">T</span>
           </div>
           <div style="display: flex; justify-content: space-between; align-items: center;">
-            <span style="color: #cbd5e1;">Play / Pause Interactive Simulation</span>
+            <span style="color: #cbd5e1;">Play / Pause Simulation</span>
             <span class="datum-tag" style="color: #10b981; border-color: #10b981;">Space</span>
           </div>
           <div style="display: flex; justify-content: space-between; align-items: center;">
-            <span style="color: #cbd5e1;">Quick-Jump to Districts (1 to 7)</span>
+            <span style="color: #cbd5e1;">Fast Travel to Districts (1 to 7)</span>
             <span class="datum-tag" style="color: #a855f7; border-color: #a855f7;">1 - 7</span>
           </div>
           <div style="display: flex; justify-content: space-between; align-items: center;">
-            <span style="color: #cbd5e1;">Center Camera on Masterplan</span>
-            <span class="datum-tag" style="color: #f59e0b; border-color: #f59e0b;">C</span>
-          </div>
-          <div style="display: flex; justify-content: space-between; align-items: center;">
-            <span style="color: #cbd5e1;">Toggle Procedural Audio FX</span>
+            <span style="color: #cbd5e1;">Toggle Sound Effects</span>
             <span class="datum-tag" style="color: #f97316; border-color: #f97316;">M</span>
-          </div>
-          <div style="display: flex; justify-content: space-between; align-items: center;">
-            <span style="color: #cbd5e1;">Close Any Modal / Panel</span>
-            <span class="datum-tag">Esc</span>
           </div>
         </div>
 

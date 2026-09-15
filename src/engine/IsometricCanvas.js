@@ -34,6 +34,7 @@ export class IsometricCanvas {
     this.selectedBuilding = null;
     this.activeFilter = 'all';
     this.showCallouts = true;
+    this.inputEnabled = false;
 
     this.initCanvasSize();
     this.centerCamera(true);
@@ -93,10 +94,19 @@ export class IsometricCanvas {
     return { gx, gy };
   }
 
+  setInputEnabled(enabled) {
+    this.inputEnabled = !!enabled;
+    if (!this.inputEnabled) {
+      this.camera.isDragging = false;
+      this.hoveredBuilding = null;
+    }
+  }
+
   bindEvents() {
     window.addEventListener('resize', () => this.initCanvasSize());
 
     this.canvas.addEventListener('mousedown', (e) => {
+      if (!this.inputEnabled) return;
       this.camera.isDragging = true;
       this.camera.dragStartX = e.clientX;
       this.camera.dragStartY = e.clientY;
@@ -105,6 +115,7 @@ export class IsometricCanvas {
     });
 
     window.addEventListener('mousemove', (e) => {
+      if (!this.inputEnabled) return;
       if (this.camera.isDragging) {
         const dx = e.clientX - this.camera.dragStartX;
         const dy = e.clientY - this.camera.dragStartY;
@@ -121,6 +132,7 @@ export class IsometricCanvas {
     });
 
     window.addEventListener('mouseup', (e) => {
+      if (!this.inputEnabled) return;
       if (this.camera.isDragging) {
         const dist = Math.hypot(e.clientX - this.camera.dragStartX, e.clientY - this.camera.dragStartY);
         this.camera.isDragging = false;
@@ -134,6 +146,7 @@ export class IsometricCanvas {
     });
 
     this.canvas.addEventListener('wheel', (e) => {
+      if (!this.inputEnabled) return;
       e.preventDefault();
       const zoomFactor = e.deltaY < 0 ? 1.14 : 0.88;
       const newZoom = Math.max(0.4, Math.min(2.5, this.camera.targetZoom * zoomFactor));

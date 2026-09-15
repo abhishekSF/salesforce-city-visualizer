@@ -73,11 +73,13 @@ document.addEventListener('DOMContentLoaded', () => {
         btnAtlas.classList.remove('active');
         if (draftingGrid) draftingGrid.style.display = 'none';
         if (programSelector) programSelector.style.display = 'none';
+        isoCanvas.setInputEnabled(false);
       } else {
         btnExplore.classList.remove('active');
         btnAtlas.classList.add('active');
         if (draftingGrid) draftingGrid.style.display = 'block';
         if (programSelector) programSelector.style.display = 'flex';
+        isoCanvas.setInputEnabled(true);
       }
     }
   });
@@ -212,6 +214,14 @@ document.addEventListener('DOMContentLoaded', () => {
       fieldGuide.show();
     } else if (e.key === 'v' || e.key === 'V') {
       atlasCoordinator.toggleMode();
+    } else if (e.key === 'e' || e.key === 'E') {
+      if (atlasCoordinator.currentMode === 'explore') {
+        const nearby = topDownWorld.getNearbyBuilding(player.x, player.y);
+        if (nearby) {
+          fieldGuide.discover(nearby);
+          inspector.show(nearby);
+        }
+      }
     } else if (e.key === 't' || e.key === 'T') {
       atlasCoordinator.setMode('atlas');
       if (guidedTour.isActive) {
@@ -289,7 +299,7 @@ function toggleShortcutsModal(container) {
           </div>
           <div style="display: flex; justify-content: space-between; align-items: center;">
             <span style="color: #cbd5e1;">Interact with Landmark / Open Dossier</span>
-            <span class="datum-tag" style="color: #00f0ff; border-color: #00f0ff;">E</span>
+            <span class="datum-tag" style="color: #00f0ff; border-color: #00f0ff;">E / Tap Landmark</span>
           </div>
           <div style="display: flex; justify-content: space-between; align-items: center;">
             <span style="color: #cbd5e1;">Toggle Mode (Explore RPG ↔ Atlas Masterplan)</span>

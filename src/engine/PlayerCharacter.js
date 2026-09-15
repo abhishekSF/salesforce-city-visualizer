@@ -125,6 +125,7 @@ export class PlayerCharacter {
   }
 
   teleport(newX, newY) {
+    if (!Number.isFinite(newX) || !Number.isFinite(newY)) return;
     this.x = newX;
     this.y = newY;
     this.animFrame = 0;

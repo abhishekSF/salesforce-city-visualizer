@@ -37,6 +37,10 @@ export class AtlasCoordinator {
       zoom: 1.35
     };
 
+    if (this.isoCanvas && typeof this.isoCanvas.setInputEnabled === 'function') {
+      this.isoCanvas.setInputEnabled(this.currentMode === 'atlas');
+    }
+
     this.bindEvents();
   }
 
@@ -46,6 +50,9 @@ export class AtlasCoordinator {
     sfx.openModal();
 
     if (newMode === 'atlas') {
+      if (this.isoCanvas && typeof this.isoCanvas.setInputEnabled === 'function') {
+        this.isoCanvas.setInputEnabled(true);
+      }
       // Sync isometric camera to player's current grid position
       const gridX = Math.round(this.player.x / 40);
       const gridY = Math.round(this.player.y / 40);
@@ -53,11 +60,16 @@ export class AtlasCoordinator {
       this.isoCanvas.camera.targetX = this.isoCanvas.width / 2 - centerScreen.x * this.isoCanvas.camera.targetZoom;
       this.isoCanvas.camera.targetY = this.isoCanvas.height / 2 - (centerScreen.y - 100) * this.isoCanvas.camera.targetZoom;
     } else {
+      if (this.isoCanvas && typeof this.isoCanvas.setInputEnabled === 'function') {
+        this.isoCanvas.setInputEnabled(false);
+      }
       // Sync player near selected isometric building if any
       if (this.isoCanvas.selectedBuilding) {
         const b = this.topDownWorld.buildings.find(item => item.id === this.isoCanvas.selectedBuilding.id);
-        if (b) {
+        if (b && Number.isFinite(b.entranceX) && Number.isFinite(b.entranceY)) {
           this.player.teleport(b.entranceX, b.entranceY);
+          this.rpgCamera.x = b.entranceX;
+          this.rpgCamera.y = b.entranceY;
         }
       }
     }
@@ -72,39 +84,48 @@ export class AtlasCoordinator {
   }
 
   fastTravel(building) {
+    if (!building) return;
+    const bId = (typeof building === 'string') ? building : building.id;
+    const worldBuilding = this.topDownWorld.buildings.find(b => b.id === bId);
+    const catalogBuilding = (this.topDownWorld.catalog && this.topDownWorld.catalog.buildings.find(b => b.id === bId)) || building;
+
     if (this.currentMode === 'explore') {
-      this.player.teleport(building.entranceX, building.entranceY);
-      this.rpgCamera.x = building.entranceX;
-      this.rpgCamera.y = building.entranceY;
+      let targetX = worldBuilding ? worldBuilding.entranceX : building.entranceX;
+      let targetY = worldBuilding ? worldBuilding.entranceY : building.entranceY;
+
+      // Fallback computation if entrance coordinates are missing
+      if (!Number.isFinite(targetX) || !Number.isFinite(targetY)) {
+        if (catalogBuilding && Number.isFinite(catalogBuilding.gridX) && Number.isFinite(catalogBuilding.gridY)) {
+          const TILE_SIZE = 40;
+          const ww = (catalogBuilding.width || 2) * TILE_SIZE;
+          const wh = (catalogBuilding.height || 2) * TILE_SIZE;
+          targetX = catalogBuilding.gridX * TILE_SIZE + ww / 2;
+          targetY = catalogBuilding.gridY * TILE_SIZE + wh + 12;
+        }
+      }
+
+      if (Number.isFinite(targetX) && Number.isFinite(targetY)) {
+        this.player.teleport(targetX, targetY);
+        this.rpgCamera.x = targetX;
+        this.rpgCamera.y = targetY;
+      }
+
       sfx.pulse();
       // Discover if not already
-      this.fieldGuide.discover(building);
-      this.inspector.show(building);
+      if (catalogBuilding) {
+        this.fieldGuide.discover(catalogBuilding);
+        this.inspector.show(catalogBuilding);
+      }
     } else {
-      this.isoCanvas.focusBuilding(building.id);
-      this.inspector.show(building);
+      this.isoCanvas.focusBuilding(bId);
+      if (catalogBuilding) {
+        this.inspector.show(catalogBuilding);
+      }
     }
   }
 
   bindEvents() {
-    // Keyboard 'V' to toggle view modes, 'E' to interact with nearby building
-    window.addEventListener('keydown', (e) => {
-      if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
-
-      if (e.key === 'v' || e.key === 'V') {
-        this.toggleMode();
-      } else if (e.key === 'e' || e.key === 'E') {
-        if (this.currentMode === 'explore') {
-          const nearby = this.topDownWorld.getNearbyBuilding(this.player.x, this.player.y);
-          if (nearby) {
-            this.fieldGuide.discover(nearby);
-            this.inspector.show(nearby);
-          }
-        }
-      }
-    });
-
-    // Touch / Click on canvas in Explore mode to move toward target
+    // Touch / Click on canvas in Explore mode to travel to & interact with landmark
     this.canvas.addEventListener('click', (e) => {
       if (this.currentMode !== 'explore') return;
 
@@ -116,9 +137,12 @@ export class AtlasCoordinator {
       const worldX = (clickScreenX - this.canvas.width / (2 * (window.devicePixelRatio || 1))) / this.rpgCamera.zoom + this.rpgCamera.x;
       const worldY = (clickScreenY - this.canvas.height / (2 * (window.devicePixelRatio || 1))) / this.rpgCamera.zoom + this.rpgCamera.y;
 
-      // Check if clicked near a building entrance
+      // Check if clicked near a building entrance or within its landmark footprint
       const b = this.topDownWorld.buildings.find(item => {
-        return Math.hypot(worldX - item.entranceX, worldY - item.entranceY) < 32;
+        const nearEntrance = Math.hypot(worldX - item.entranceX, worldY - item.entranceY) < 36;
+        const insideBounds = worldX >= item.worldX && worldX <= item.worldX + item.worldW &&
+                             worldY >= item.worldY && worldY <= item.worldY + item.worldH;
+        return nearEntrance || insideBounds;
       });
 
       if (b) {
